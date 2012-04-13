@@ -49,7 +49,7 @@ public class ShootStrategy implements Condition, Task {
     private boolean interact(final Location location, final String action) {
         if (!Menu.contains(action)) {
             final Point center = location.getCentralPoint();
-            Mouse.move(center.x, center.y);
+            Mouse.move(center.x, center.y, 4, 4);
         }
         return Menu.contains(action) && Menu.select(action);
     }
