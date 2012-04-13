@@ -3,6 +3,7 @@ package org.bbrangeguild;
 import org.bbrangeguild.strategy.CompeteStrategy;
 import org.bbrangeguild.strategy.EquipStrategy;
 import org.bbrangeguild.strategy.ShootStrategy;
+import org.bbrangeguild.util.MousePathPoint;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
@@ -10,6 +11,7 @@ import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
 import org.powerbot.game.api.methods.Game;
 import org.powerbot.game.api.methods.Widgets;
+import org.powerbot.game.api.methods.input.Mouse;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.tab.Skills;
 import org.powerbot.game.api.methods.widget.Camera;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.LinkedList;
 
 @Manifest(name = "BBRangeGuild",
         authors = "BOOM BOOM",
@@ -47,6 +50,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     private static final RenderingHints RENDERING_HINTS = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Font ARIAL_12_BOLD = new Font("Arial", Font.BOLD, 12), ARIAL_12 = new Font("Arial", Font.PLAIN, 12);
     private static final Color BACKGROUND = new Color(194, 178, 146), GREEN = new Color(32, 95, 0);
+    private static final LinkedList<MousePathPoint> mousePath = new LinkedList<MousePathPoint>();
 
     private String formatCommas(final int i) {
         return NumberFormat.getIntegerInstance().format(i);
@@ -148,6 +152,34 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         log.info((startTime != 0 ? "Total run time: " + Time.format(System.currentTimeMillis() - startTime) : "Script wasn't loaded") + ".");
     }
 
+    private void drawMouse(final Graphics g) {
+        final Point location = Mouse.getLocation();
+        while (!mousePath.isEmpty() && mousePath.peek().isUp())
+            mousePath.remove();
+        Point clientCursor = Mouse.getLocation();
+        MousePathPoint mpp = new MousePathPoint(clientCursor.x, clientCursor.y, 1500);
+        if (mousePath.isEmpty() || !mousePath.getLast().equals(mpp))
+            mousePath.add(mpp);
+        MousePathPoint lastPoint = null;
+        for (MousePathPoint a : mousePath) {
+            if (lastPoint != null) {
+                g.setColor(a.getColor());
+                g.drawLine(a.x, a.y, lastPoint.x, lastPoint.y);
+            }
+            lastPoint = a;
+        }
+
+        if (System.currentTimeMillis() - Mouse.getPressTime() < 500)
+            g.setColor(new Color(168, 9, 9));
+        else
+            g.setColor(GREEN);
+        g.fillOval(location.x - 5, location.y - 5, 10, 10);
+        g.setColor(Color.BLACK);
+        g.drawLine(location.x - 7, location.y, location.x + 7, location.y);
+        g.drawLine(location.x, location.y - 7, location.x, location.y + 7);
+        g.drawOval(location.x - 5, location.y - 5, 10, 10);
+    }
+
     private int getPercentToNextLevel() {
         final int level = Skills.getRealLevel(Skills.RANGE);
         final int nextLevel = level + 1;
@@ -179,8 +211,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setFont(ARIAL_12_BOLD);
                 g.setColor(Color.BLACK);
                 final long runTime = System.currentTimeMillis() - startTime;
-                g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Script loading..."), 12, absoluteY + 17);
-                g.drawString("Current State: " + (startTime != 0 ? "TODO" : "Script Loading..."), 158, absoluteY + 17);
+                g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Wait..."), 12, absoluteY + 17);
+                g.drawString("Current State: " + (startTime != 0 ? "TODO" : "Loading..."), 158, absoluteY + 17);
 
                 g.setColor(GREEN);
                 g.drawString("GUI Settings:", 12, absoluteY + 36);
@@ -238,6 +270,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setColor(new Color(33, 28, 28));
                 g.drawString(levelInfo, absoluteY - 99 - ((int) g.getFontMetrics().getStringBounds(levelInfo, g).getWidth() / 2), absoluteY - 12);
             }
+            drawMouse(g);
         }
     }
 
