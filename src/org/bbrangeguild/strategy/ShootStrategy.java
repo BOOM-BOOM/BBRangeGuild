@@ -7,7 +7,6 @@ import org.powerbot.game.api.methods.input.Mouse;
 import org.powerbot.game.api.methods.node.Locations;
 import org.powerbot.game.api.methods.node.Menu;
 import org.powerbot.game.api.methods.widget.Camera;
-import org.powerbot.game.api.util.Random;
 import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.node.Location;
 
@@ -31,19 +30,17 @@ public class ShootStrategy implements Condition, Task {
         if (target != null) {
             if (target.isOnScreen()) {
                 if (!Widgets.get(325, 40).isVisible()) {
-                    if (interact(target, "Fire-at")) {
+                    if (interact(target, "Fire-at"))
                         fails = 0;
-                        Time.sleep(Random.nextInt(50, 80));
-                    } else if (fails > 20) {
-                        if (Widgets.get(325, 40).isOnScreen()) {
-                            if (Widgets.get(325, 40).click(true)) {
-                                for (int i = 0; i < 20 && Widgets.get(325, 40).isOnScreen(); i++)
-                                    Time.sleep(100);
-                            }
+                } else if (fails > 5) {
+                    if (Widgets.get(325, 40).isVisible()) {
+                        if (Widgets.get(325, 40).click(true)) {
+                            for (int i = 0; i < 20 && Widgets.get(325, 40).isVisible(); i++)
+                                Time.sleep(100);
                         }
-                    } else
-                        fails++;
-                }
+                    }
+                } else
+                    fails++;
             } else
                 Camera.turnTo(target);
         }
@@ -54,12 +51,7 @@ public class ShootStrategy implements Condition, Task {
             final Point center = location.getCentralPoint();
             Mouse.move(center.x, center.y);
         }
-        if (Menu.contains(action)) {
-            if (!Menu.isOpen())
-                Mouse.click(false);
-            return Menu.select(action);
-        }
-        return false;
+        return Menu.contains(action) && Menu.select(action);
     }
 
 }
