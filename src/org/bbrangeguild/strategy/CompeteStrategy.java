@@ -1,5 +1,6 @@
 package org.bbrangeguild.strategy;
 
+import org.bbrangeguild.BBRangeGuild;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
@@ -14,6 +15,12 @@ import org.powerbot.game.api.wrappers.interactive.Npc;
  * @author BOOM BOOM
  */
 public class CompeteStrategy extends Strategy implements Condition, Task {
+
+    private BBRangeGuild script;
+
+    public CompeteStrategy(final BBRangeGuild script) {
+        this.script = script;
+    }
 
     @Override
     public boolean validate() {
@@ -36,6 +43,7 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
         }
 
         if (Widgets.get(1188, 3).isVisible()) {
+            script.setCentralPoint(null);
             if (Widgets.get(1188, 3).click(true)) {
                 for (int i = 0; i < 25 && Widgets.get(1188, 3).isVisible(); i++)
                     Time.sleep(100);

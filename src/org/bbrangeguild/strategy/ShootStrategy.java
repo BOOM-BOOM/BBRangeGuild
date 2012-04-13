@@ -1,5 +1,6 @@
 package org.bbrangeguild.strategy;
 
+import org.bbrangeguild.BBRangeGuild;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.game.api.methods.Widgets;
@@ -17,7 +18,12 @@ import java.awt.*;
  */
 public class ShootStrategy implements Condition, Task {
 
+    private BBRangeGuild script;
     private int fails;
+
+    public ShootStrategy(final BBRangeGuild script) {
+        this.script = script;
+    }
 
     @Override
     public boolean validate() {
@@ -29,29 +35,40 @@ public class ShootStrategy implements Condition, Task {
         Location target = Locations.getNearest(1308);
         if (target != null) {
             if (target.isOnScreen()) {
-                if (!Widgets.get(325, 40).isVisible()) {
-                    if (interact(target, "Fire-at"))
-                        fails = 0;
-                } else if (fails > 5) {
+                if (interact(target, "Fire-at", Widgets.get(325, 40).isVisible()))
+                    fails = 0;
+
+                if (fails > 5) {
                     if (Widgets.get(325, 40).isVisible()) {
                         if (Widgets.get(325, 40).click(true)) {
                             for (int i = 0; i < 20 && Widgets.get(325, 40).isVisible(); i++)
                                 Time.sleep(100);
                         }
                     }
-                } else
+                } else if (Widgets.get(325, 40).isVisible())
                     fails++;
             } else
                 Camera.turnTo(target);
         }
     }
 
-    private boolean interact(final Location location, final String action) {
-        if (!Menu.contains(action)) {
+    private boolean interact(final Location location, final String action, final boolean open) {
+        if (script.getCentralPoint() == null || !isClose(Mouse.getLocation())) {
             final Point center = location.getCentralPoint();
+            script.setCentralPoint(center);
             Mouse.move(center.x, center.y, 4, 4);
         }
+
+        if (open) {
+            Mouse.click(true);
+            return false;
+        }
         return Menu.contains(action) && Menu.select(action);
+    }
+
+    private boolean isClose(final Point point) {
+        final Point center = script.getCentralPoint();
+        return point.distance(center) < 5;
     }
 
 }

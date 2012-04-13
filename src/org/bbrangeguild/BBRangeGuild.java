@@ -46,6 +46,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     private boolean mainHidden, barHidden;
     private Strategy setupStrategy;
     private BufferedImage labelPic;
+    private Point centralPoint;
     private static final DecimalFormat xpFormat = new DecimalFormat("0.#");
     private static final RenderingHints RENDERING_HINTS = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Font ARIAL_12_BOLD = new Font("Arial", Font.BOLD, 12), ARIAL_12 = new Font("Arial", Font.PLAIN, 12);
@@ -73,6 +74,14 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             e.printStackTrace();
         }
         return null;
+    }
+
+    public Point getCentralPoint() {
+       return centralPoint;
+    }
+
+    public void setCentralPoint(final Point centralPoint) {
+        this.centralPoint = centralPoint;
     }
 
     @Override
@@ -120,8 +129,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         });
 
         final EquipStrategy equipStrategy = new EquipStrategy(this);
-        final CompeteStrategy competeStrategy = new CompeteStrategy();
-        final ShootStrategy shootStrategy = new ShootStrategy();
+        final CompeteStrategy competeStrategy = new CompeteStrategy(this);
+        final ShootStrategy shootStrategy = new ShootStrategy(this);
 
         setupStrategy.setReset(true);
         camera.setLock(false);
