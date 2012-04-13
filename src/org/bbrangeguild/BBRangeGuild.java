@@ -14,9 +14,6 @@ import org.powerbot.game.api.util.Random;
 @Manifest(name = "BBRangeGuild", authors = "BOOM BOOM", version = 1.0D, description = "TODO", premium = true)
 public class BBRangeGuild extends ActiveScript {
 
-    //1184, 0 = out of shots
-    //1188, 3 = Yes for 200 coins
-
     @Override
     protected void setup() {
         final Strategy camera = new Strategy(new Condition() {
