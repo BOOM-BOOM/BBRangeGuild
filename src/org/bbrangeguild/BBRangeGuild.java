@@ -9,7 +9,6 @@ import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
 import org.powerbot.game.api.methods.Game;
-import org.powerbot.game.api.methods.Settings;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.tab.Skills;
@@ -39,7 +38,7 @@ import java.text.NumberFormat;
         premium = true)
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
-    private int startXP, startLevel, startTickets, gamesCompleted, absoluteY, price;
+    private int startXP, startLevel, startTickets, gamesCompleted, absoluteY, price = 185;
     private long startTime;
     private boolean mainHidden, barHidden;
     private Strategy setupStrategy;
@@ -74,13 +73,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
     @Override
     protected void setup() {
-        submit(new Task() {
-            @Override
-            public void run() {
-                labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpg", ".jpg");
-            }
-        });
-
         setupStrategy = new Strategy(new Condition() {
             @Override
             public boolean validate() {
@@ -92,12 +84,11 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 String money;
                 if (Inventory.getCount(995) > 0 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null
                         && Integer.parseInt(money.replace("M", "").replace("K", "")) > 0)) {
+                    labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpg", ".jpg");
                     startXP = Skills.getExperience(Skills.RANGE);
                     startLevel = Skills.getRealLevel(Skills.RANGE);
                     if (Inventory.getCount(1464) > 0)
                         startTickets = Inventory.getCount(true, 1464);
-                    if (Settings.get(156) > 0)
-                        gamesCompleted++;
                     startTime = System.currentTimeMillis();
                     revoke(setupStrategy);
                 } else {
@@ -138,8 +129,23 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         provide(new Strategy(shootStrategy, shootStrategy));
     }
 
-    public void onFinish() {
-
+    @Override
+    public void onStop() {
+        if (startTime != 0) {
+            int gainedXP = Skills.getExperience(Skills.RANGE) - startXP;
+            int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
+            int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
+            int tph = (int) (gainedTickets * 3600000D / (System.currentTimeMillis() - startTime));
+            double profit = (gainedTickets != 0 ? gainedTickets / 20.4 * price : 0);
+            int pph = (int) (profit * 3600000D / (System.currentTimeMillis() - startTime));
+            int gph = (int) (gamesCompleted * 3600000D / (System.currentTimeMillis() - startTime));
+            log.info("Total levels gained: " + (Skills.getRealLevel(Skills.RANGE) - startLevel) + ".");
+            log.info("Total XP gained: " + formatCommas(gainedXP) + " (" + formatCommas(eph) + "/H).");
+            log.info("Total profit gained: " + formatCommas((int) profit - (gamesCompleted * 200)) + " (" + formatCommas(pph - (gph * 200)) + "/H).");
+            log.info("Total tickets gained: " + formatCommas(gainedTickets) + " (" + formatCommas(tph) + "/H).");
+            log.info("Total games played: " + formatCommas(gamesCompleted) + " (" + formatCommas(gph) + "/H).");
+        }
+        log.info((startTime != 0 ? "Total run time: " + Time.format(System.currentTimeMillis() - startTime) : "Script wasn't loaded") + ".");
     }
 
     private int getPercentToNextLevel() {
@@ -186,7 +192,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setFont(ARIAL_12);
                 g.setColor(Color.BLACK);
                 final int gainedXP = Skills.getExperience(Skills.RANGE) - startXP;
-                final int gainedTickets = Inventory.getCount(1464) - startTickets;
+                final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
                 final double profit = gainedTickets / 20.4 * price;
                 g.drawString("" + formatCommas((int) profit - (gamesCompleted * 200)), 100, absoluteY + 51);
                 g.drawString("" + formatCommas(gainedXP), 100, absoluteY + 66);
