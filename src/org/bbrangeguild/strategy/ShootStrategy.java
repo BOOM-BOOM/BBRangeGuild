@@ -3,12 +3,16 @@ package org.bbrangeguild.strategy;
 import org.bbrangeguild.BBRangeGuild;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
+import org.powerbot.game.api.methods.Calculations;
+import org.powerbot.game.api.methods.Walking;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;
+import org.powerbot.game.api.methods.interactive.Players;
 import org.powerbot.game.api.methods.node.Locations;
 import org.powerbot.game.api.methods.node.Menu;
 import org.powerbot.game.api.methods.widget.Camera;
 import org.powerbot.game.api.util.Time;
+import org.powerbot.game.api.wrappers.Tile;
 import org.powerbot.game.api.wrappers.node.Location;
 
 import java.awt.*;
@@ -20,6 +24,8 @@ public class ShootStrategy implements Condition, Task {
 
     private BBRangeGuild script;
     private int fails;
+    private final Tile targetTile = new Tile(2679, 3426, 0);
+    private final Tile spot = new Tile(2670, 3418, 0);
 
     public ShootStrategy(final BBRangeGuild script) {
         this.script = script;
@@ -27,14 +33,29 @@ public class ShootStrategy implements Condition, Task {
 
     @Override
     public boolean validate() {
-        return true;
+        return !script.getCombatInitialized();
     }
 
     @Override
     public void run() {
-        Location target = Locations.getNearest(1308);
+        if (Calculations.distance(Players.getLocal().getPosition(), spot) > 4) {
+            if (Walking.walk(spot)) {
+                for (int i = 0; i < 25 && Calculations.distance(Players.getLocal().getPosition(), spot) > 1; i++) {
+                    if (Players.getLocal().isMoving())
+                        i = 0;
+                    Time.sleep(100);
+                }
+            }
+        }
+
+        final Location target = getAt(targetTile);
         if (target != null) {
             if (target.isOnScreen()) {
+                if (Players.getLocal().isInCombat()) {
+                    script.setCombatInitialized(true);
+                    return;
+                }
+
                 if (interact(target, "Fire-at", Widgets.get(325, 40).isVisible()))
                     fails = 0;
 
@@ -53,8 +74,8 @@ public class ShootStrategy implements Condition, Task {
     }
 
     private boolean interact(final Location location, final String action, final boolean open) {
-        if (script.getCentralPoint() == null || !isClose(Mouse.getLocation())) {
-            final Point center = location.getCentralPoint();
+        final Point center = location.getCentralPoint();
+        if (script.getCentralPoint() == null || distanceBetween(Mouse.getLocation(), center) > 4) {
             script.setCentralPoint(center);
             Mouse.move(center.x, center.y, 4, 4);
         }
@@ -66,8 +87,13 @@ public class ShootStrategy implements Condition, Task {
         return Menu.contains(action) && Menu.select(action);
     }
 
-    private boolean isClose(final Point point) {
-        return point.distance(script.getCentralPoint()) < 5;
+    public double distanceBetween(Point curr, Point dest) {
+        return Math.sqrt(((curr.x - dest.x) * (curr.x - dest.x)) + ((curr.y - dest.y) * (curr.y - dest.y)));
+    }
+
+    private Location getAt(final Tile tile) {
+        Location[] locations = Locations.getLoaded(tile);
+        return locations.length > 0 ? locations[0] : null;
     }
 
 }
