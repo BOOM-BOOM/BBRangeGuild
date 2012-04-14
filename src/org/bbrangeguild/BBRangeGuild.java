@@ -44,7 +44,7 @@ import java.util.LinkedList;
         premium = true)
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
-    private int startXP, startLevel, startTickets, targetMessage, gamesCompleted, absoluteY, price = 185;
+    private int startXP, startLevel, startTickets, targetMessage, gamesCompleted, absoluteY, price;
     private long startTime;
     private boolean mainHidden, barHidden, combatInitialized;
     private Strategy setupStrategy;
@@ -98,7 +98,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         this.centralPoint = centralPoint;
     }
 
-    public boolean getCombatInitialized() {
+    public boolean isCombatInitialized() {
         return combatInitialized;
     }
 
@@ -181,13 +181,13 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     @Override
     public void onStop() {
         if (startTime != 0) {
-            int gainedXP = Skills.getExperience(Skills.RANGE) - startXP;
-            int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
-            int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
-            int tph = (int) (gainedTickets * 3600000D / (System.currentTimeMillis() - startTime));
-            double profit = (gainedTickets != 0 ? gainedTickets / 20.4 * price : 0);
-            int pph = (int) (profit * 3600000D / (System.currentTimeMillis() - startTime));
-            int gph = (int) (gamesCompleted * 3600000D / (System.currentTimeMillis() - startTime));
+            final int gainedXP = Skills.getExperience(Skills.RANGE) - startXP;
+            final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
+            final int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
+            final int tph = (int) (gainedTickets * 3600000D / (System.currentTimeMillis() - startTime));
+            final double profit = (gainedTickets != 0 ? gainedTickets / 20.4 * price : 0);
+            final int pph = (int) (profit * 3600000D / (System.currentTimeMillis() - startTime));
+            final int gph = (int) (gamesCompleted * 3600000D / (System.currentTimeMillis() - startTime));
             log.info("Total levels gained: " + (Skills.getRealLevel(Skills.RANGE) - startLevel) + ".");
             log.info("Total XP gained: " + formatCommas(gainedXP) + " (" + formatCommas(eph) + "/H).");
             log.info("Total profit gained: " + formatCommas((int) profit - (gamesCompleted * 200)) + " (" + formatCommas(pph - (gph * 200)) + "/H).");
@@ -324,11 +324,12 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         switch (messageEvent.getId()) {
             case 109:
                 if (messageEvent.getMessage().equalsIgnoreCase("You carefully aim at the target...")) {
-                    if (targetMessage > 9) {
+                    if (targetMessage < 9)
+                        targetMessage++;
+                    else {
                         targetMessage = 0;
                         gamesCompleted++;
-                    } else
-                        targetMessage++;
+                    }
                 } else if (messageEvent.getMessage().equalsIgnoreCase("200 coins have been removed from your money pouch.") && targetMessage > 0) {
                     targetMessage = 0;
                     gamesCompleted++;

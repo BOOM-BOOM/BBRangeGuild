@@ -29,11 +29,14 @@ public class CombatStrategy extends Strategy implements Condition, Task {
 
     @Override
     public boolean validate() {
-        return Players.getLocal().isInCombat() || script.getCombatInitialized();
+        return Players.getLocal().isInCombat() || script.isCombatInitialized();
     }
 
     @Override
     public void run() {
+        if (!script.isCombatInitialized())
+            script.setCombatInitialized(true);
+
         if (Game.getPlane() == 0) {
             if (Widgets.get(564, 0).isVisible()) {
                 if (Widgets.get(564, 15).click(true)) {

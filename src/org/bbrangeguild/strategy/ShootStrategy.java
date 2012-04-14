@@ -33,7 +33,7 @@ public class ShootStrategy implements Condition, Task {
 
     @Override
     public boolean validate() {
-        return !script.getCombatInitialized();
+        return !script.isCombatInitialized();
     }
 
     @Override
@@ -87,8 +87,8 @@ public class ShootStrategy implements Condition, Task {
         return Menu.contains(action) && Menu.select(action);
     }
 
-    public double distanceBetween(Point curr, Point dest) {
-        return Math.sqrt(((curr.x - dest.x) * (curr.x - dest.x)) + ((curr.y - dest.y) * (curr.y - dest.y)));
+    private double distanceBetween(Point current, Point destination) {
+        return Math.sqrt(((current.x - destination.x) * (current.x - destination.x)) + ((current.y - destination.y) * (current.y - destination.y)));
     }
 
     private Location getAt(final Tile tile) {
