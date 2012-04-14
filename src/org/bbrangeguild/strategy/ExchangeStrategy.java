@@ -35,9 +35,10 @@ public class ExchangeStrategy implements Condition, Task {
                 if (widgetChild.getChildId() == 1464 && widgetChild.getChildStackSize() < 1020) {
                     script.log.info("You do not have enough tickets to exchange.");
                     script.stop();
-                    break;
+                    return;
                 }
             }
+
             if (Widgets.get(278, 16).getChildren()[2].interact("Buy"))
                 Time.sleep(Random.nextInt(100, 300));
         } else {
