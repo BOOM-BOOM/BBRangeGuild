@@ -29,6 +29,12 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
 
     @Override
     public void run() {
+        String text;
+        if (Widgets.get(1184, 13).isVisible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("200 costs 200 coins")) {
+            script.log.info("You have ran out of money!");
+            script.stop();
+        }
+
         if (!Widgets.get(1188, 3).isVisible()) {
             Npc judge = Npcs.getNearest(693);
             if (judge != null) {

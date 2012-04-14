@@ -67,8 +67,7 @@ public class ShootStrategy implements Condition, Task {
     }
 
     private boolean isClose(final Point point) {
-        final Point center = script.getCentralPoint();
-        return point.distance(center) < 5;
+        return point.distance(script.getCentralPoint()) < 5;
     }
 
 }

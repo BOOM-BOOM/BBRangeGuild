@@ -3,6 +3,7 @@ package org.bbrangeguild;
 import org.bbrangeguild.strategy.CompeteStrategy;
 import org.bbrangeguild.strategy.EquipStrategy;
 import org.bbrangeguild.strategy.ShootStrategy;
+import org.bbrangeguild.util.GeItem;
 import org.bbrangeguild.util.MousePathPoint;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
@@ -76,6 +77,16 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         return null;
     }
 
+    private int parseMultiplier(final String str) {
+        if (str.matches("-?\\d+(\\.\\d+)?[kmb]")) {
+            return (int) (Double.parseDouble(str.substring(0, str.length() - 1))
+                    * (str.endsWith("b") ? 1000000000D : str.endsWith("m") ? 1000000
+                    : str.endsWith("k") ? 1000 : 1));
+        } else {
+            return Integer.parseInt(str);
+        }
+    }
+
     public Point getCentralPoint() {
        return centralPoint;
     }
@@ -93,13 +104,14 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             }
         }, new Task() {
             @Override
-            public void run() {
-                String money;
-                if (Inventory.getCount(995) > 0 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null
-                        && Integer.parseInt(money.replace("M", "").replace("K", "")) > 0)) {
+            public void run() {//278, 2 = rune arrow buying 512,0 = shop inventory
+                String money = null;
+                if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null)) {
+                    log.info("" + parseMultiplier(money));
                     labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpg", ".jpg");
                     startXP = Skills.getExperience(Skills.RANGE);
                     startLevel = Skills.getRealLevel(Skills.RANGE);
+                    price = GeItem.lookup(892).getPrice();
                     if (Inventory.getCount(1464) > 0)
                         startTickets = Inventory.getCount(true, 1464);
                     startTime = System.currentTimeMillis();
@@ -110,7 +122,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 }
             }
         });
-
+        //final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
+        //provide(new Strategy(exchangeStrategy, exchangeStrategy));
         final Strategy camera = new Strategy(new Condition() {
             @Override
             public boolean validate() {
