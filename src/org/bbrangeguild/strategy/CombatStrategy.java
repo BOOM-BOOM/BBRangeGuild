@@ -34,6 +34,7 @@ public class CombatStrategy extends Strategy implements Condition, Task {
 
     @Override
     public void run() {
+        script.setStatus("Avoiding Combat...");
         if (!script.isCombatInitialized())
             script.setCombatInitialized(true);
 

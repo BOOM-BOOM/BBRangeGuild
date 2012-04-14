@@ -28,6 +28,7 @@ public class EquipStrategy implements Condition, Task {
     @Override
     public void run() {
         if (Inventory.getCount(882) > 0) {
+            script.setStatus("Equiping Arrows...");
             for (final Item item : Inventory.getItems()) {
                 if (item.getId() == 882 && item.getWidgetChild().click(true)) {
                     for (int i = 0; i < 15 && Inventory.getCount(882) > 0; i++)

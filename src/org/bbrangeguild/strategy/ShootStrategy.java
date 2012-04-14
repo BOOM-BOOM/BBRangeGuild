@@ -38,6 +38,7 @@ public class ShootStrategy implements Condition, Task {
 
     @Override
     public void run() {
+        script.setStatus("Shooting...");
         if (Calculations.distance(Players.getLocal().getPosition(), spot) > 4) {
             if (Walking.walk(spot)) {
                 for (int i = 0; i < 25 && Calculations.distance(Players.getLocal().getPosition(), spot) > 1; i++) {

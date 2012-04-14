@@ -47,6 +47,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     private int startXP, startLevel, startTickets, targetMessage, gamesCompleted, absoluteY, price;
     private long startTime;
     private boolean mainHidden, barHidden, combatInitialized;
+    private String status = "Loading...";
     private Strategy setupStrategy;
     private BufferedImage labelPic;
     private Point centralPoint;
@@ -104,6 +105,10 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
     public void setCombatInitialized(final boolean combatInitialized) {
         this.combatInitialized = combatInitialized;
+    }
+
+    public void setStatus(final String status) {
+        this.status = status;
     }
 
     @Override
@@ -256,8 +261,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setFont(ARIAL_12_BOLD);
                 g.setColor(Color.BLACK);
                 final long runTime = System.currentTimeMillis() - startTime;
-                g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Wait..."), 12, absoluteY + 17);
-                g.drawString("Current State: " + (startTime != 0 ? "TODO" : "Loading..."), 158, absoluteY + 17);
+                g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Waiting..."), 12, absoluteY + 17);
+                g.drawString("Current State: " + status, 158, absoluteY + 17);
 
                 g.setColor(GREEN);
                 g.drawString("GUI Settings:", 12, absoluteY + 36);

@@ -33,6 +33,7 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
         String money;
         if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null) && script.parseMultiplier(money) > 200) {
             if (!Widgets.get(1188, 3).isVisible()) {
+                script.setStatus("Talking To Judge...");
                 final Npc judge = Npcs.getNearest(693);
                 if (judge != null) {
                     if (judge.isOnScreen()) {
@@ -46,6 +47,7 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
             }
 
             if (Widgets.get(1188, 3).isVisible()) {
+                script.setStatus("Paying Judge...");
                 script.setCentralPoint(null);
                 if (Widgets.get(1188, 3).click(true)) {
                     for (int i = 0; i < 25 && Widgets.get(1188, 3).isVisible(); i++)
