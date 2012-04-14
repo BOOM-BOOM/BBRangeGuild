@@ -6,6 +6,7 @@ import org.bbrangeguild.strategy.EquipStrategy;
 import org.bbrangeguild.strategy.ShootStrategy;
 import org.bbrangeguild.util.GeItem;
 import org.bbrangeguild.util.MousePathPoint;
+import org.bbrangeguild.util.SkillData;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
@@ -44,13 +45,14 @@ import java.util.LinkedList;
         premium = true)
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
-    private int startXP, startLevel, startTickets, targetMessage, gamesCompleted, absoluteY, price;
+    private int startTickets, targetMessage, gamesCompleted, absoluteY, price;
     private long startTime;
     private boolean mainHidden, barHidden, combatInitialized;
     private String status = "Loading...";
     private Strategy setupStrategy;
     private BufferedImage labelPic;
     private Point centralPoint;
+    private SkillData skillData;
     private static final DecimalFormat format = new DecimalFormat("#,##0.#");
     private static final RenderingHints RENDERING_HINTS = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Font ARIAL_12_BOLD = new Font("Arial", Font.BOLD, 12), ARIAL_12 = new Font("Arial", Font.PLAIN, 12);
@@ -125,8 +127,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                     String money;
                     if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null) && parseMultiplier(money) > 200) {
                         labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpg", ".jpg");
-                        startXP = Skills.getExperience(Skills.RANGE);
-                        startLevel = Skills.getRealLevel(Skills.RANGE);
                         price = GeItem.lookup(892).getPrice();
 
                         if (Inventory.getCount(1464) > 0)
@@ -139,7 +139,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                             }
                         }
 
-                        startTime = System.currentTimeMillis();
+                        skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
                         revoke(setupStrategy);
                     } else {
                         log.info("You do not have any coins with you.");
@@ -186,20 +186,20 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     @Override
     public void onStop() {
         if (startTime != 0) {
-            final int gainedXP = Skills.getExperience(Skills.RANGE) - startXP;
+            final int gainedXP = skillData.getGainedXP();
             final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
             final int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
             final int tph = (int) (gainedTickets * 3600000D / (System.currentTimeMillis() - startTime));
             final double profit = (gainedTickets != 0 ? gainedTickets / 20.4 * price : 0);
             final int pph = (int) (profit * 3600000D / (System.currentTimeMillis() - startTime));
             final int gph = (int) (gamesCompleted * 3600000D / (System.currentTimeMillis() - startTime));
-            log.info("Total levels gained: " + (Skills.getRealLevel(Skills.RANGE) - startLevel) + ".");
+            log.info("Total levels gained: " + skillData.getGainedLevels() + ".");
             log.info("Total XP gained: " + formatCommas(gainedXP) + " (" + formatCommas(eph) + "/H).");
             log.info("Total profit gained: " + formatCommas((int) profit - (gamesCompleted * 200)) + " (" + formatCommas(pph - (gph * 200)) + "/H).");
             log.info("Total tickets gained: " + formatCommas(gainedTickets) + " (" + formatCommas(tph) + "/H).");
             log.info("Total games played: " + formatCommas(gamesCompleted) + " (" + formatCommas(gph) + "/H).");
         }
-        log.info((startTime != 0 ? "Total run time: " + Time.format(System.currentTimeMillis() - startTime) : "Script wasn't loaded") + ".");
+        log.info((startTime != 0 ? "Total run time: " + Time.format(skillData.getElapsedTime()) : "Script wasn't loaded") + ".");
     }
 
     private void drawMouse(final Graphics g) {
@@ -230,22 +230,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         g.drawOval(location.x - 5, location.y - 5, 10, 10);
     }
 
-    private int getPercentToNextLevel() {
-        final int level = Skills.getRealLevel(Skills.RANGE);
-        final int nextLevel = level + 1;
-        if (level == 99 || nextLevel > 99)
-            return 0;
-        final int xpTotal = Skills.getExperienceRequired(nextLevel) - Skills.getExperienceRequired(level);
-        if (xpTotal == 0)
-            return 0;
-        final int xpDone = Skills.getExperience(Skills.RANGE) - Skills.getExperienceRequired(level);
-        return xpDone * 100 / xpTotal;
-    }
-
-    private int getExperienceToLevel() {
-        return Skills.getExperienceRequired(Skills.getRealLevel(Skills.RANGE) + 1) - Skills.getExperience(Skills.RANGE);
-    }
-
     @Override
     public void onRepaint(Graphics graphics) {
         final Graphics2D g = (Graphics2D) graphics;
@@ -260,7 +244,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
                 g.setFont(ARIAL_12_BOLD);
                 g.setColor(Color.BLACK);
-                final long runTime = System.currentTimeMillis() - startTime;
+                final long runTime = skillData.getElapsedTime();
                 g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Waiting..."), 12, absoluteY + 17);
                 g.drawString("Current State: " + status, 158, absoluteY + 17);
 
@@ -273,7 +257,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
                 g.setFont(ARIAL_12);
                 g.setColor(Color.BLACK);
-                final int gainedXP = Skills.getExperience(Skills.RANGE) - startXP;
+                final int gainedXP = skillData.getGainedXP();
                 final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
                 final double profit = gainedTickets / 20.4 * price;
                 g.drawString("" + formatCommas((int) profit - (gamesCompleted * 200)), 100, absoluteY + 51);
@@ -303,14 +287,13 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setColor(new Color(255, 219, 130));
                 g.fillRect(5, absoluteY - 25, 510, 16);
 
-                final int percent = Skills.getRealLevel(Skills.RANGE) == 99 ? 100 : getPercentToNextLevel();
-                final int eph = (int) ((Skills.getExperience(Skills.RANGE) - startXP) * 3600000D / (System.currentTimeMillis() - startTime));
-                final long ttl = (long) ((getExperienceToLevel() * 3600000D) / eph);
-                final String levelInfo = percent + "% To Level "
-                        + (Skills.getRealLevel(Skills.RANGE) == 99 ? 99 : Skills.getRealLevel(Skills.RANGE)) + " ("
-                        + (Skills.getRealLevel(Skills.RANGE) - startLevel)
-                        + " Gained)" + " - " + format.format(getExperienceToLevel() / 1000D) + "K XP - " +
-                        (eph > 0 && startTime != 0 ? Time.format(ttl) : "Calculating...") + " TTL";
+                final int percent = Skills.getRealLevel(Skills.RANGE) == 99 ? 100 : skillData.getPercentToNextLevel();
+                final int eph = (int) (skillData.getGainedXP() * 3600000D / (System.currentTimeMillis() - startTime));
+                final long ttl = (long) ((skillData.getExperienceToLevel() * 3600000D) / eph);
+                String levelInfo = percent + "% To Level "
+                        + (Skills.getRealLevel(Skills.RANGE) == 99 ? 99 : Skills.getRealLevel(Skills.RANGE)) + " (" + skillData.getGainedLevels()
+                        + " Gained)" + " - " + format.format(skillData.getExperienceToLevel() / 1000D) + "K XP - "
+                        + (eph > 0 && startTime != 0 ? Time.format(ttl) : "Calculating...") + " TTL";
 
                 g.setColor(new Color(0, 127, 14, 200));
                 g.fillRect(5, absoluteY - 25, (int) (5.1 * percent), 16);
