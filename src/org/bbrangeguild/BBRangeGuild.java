@@ -148,6 +148,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 }
             }
         });
+
         //final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
         //provide(new Strategy(exchangeStrategy, exchangeStrategy));
         final Strategy camera = new Strategy(new Condition() {

@@ -6,11 +6,11 @@ import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.methods.Settings;
 import org.powerbot.game.api.methods.Widgets;
-import org.powerbot.game.api.methods.interactive.Npcs;
+import org.powerbot.game.api.methods.interactive.NPCs;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.widget.Camera;
 import org.powerbot.game.api.util.Time;
-import org.powerbot.game.api.wrappers.interactive.Npc;
+import org.powerbot.game.api.wrappers.interactive.NPC;
 
 /**
  * @author BOOM BOOM
@@ -34,7 +34,7 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
         if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null) && script.parseMultiplier(money) > 200) {
             if (!Widgets.get(1188, 3).isVisible()) {
                 script.setStatus("Talking To Judge...");
-                final Npc judge = Npcs.getNearest(693);
+                final NPC judge = NPCs.getNearest(693);
                 if (judge != null) {
                     if (judge.isOnScreen()) {
                         if (judge.interact("Compete")) {

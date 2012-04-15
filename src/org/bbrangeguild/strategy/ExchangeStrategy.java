@@ -4,12 +4,12 @@ import org.bbrangeguild.BBRangeGuild;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.game.api.methods.Widgets;
-import org.powerbot.game.api.methods.interactive.Npcs;
+import org.powerbot.game.api.methods.interactive.NPCs;
 import org.powerbot.game.api.methods.interactive.Players;
 import org.powerbot.game.api.methods.widget.Camera;
 import org.powerbot.game.api.util.Random;
 import org.powerbot.game.api.util.Time;
-import org.powerbot.game.api.wrappers.interactive.Npc;
+import org.powerbot.game.api.wrappers.interactive.NPC;
 import org.powerbot.game.api.wrappers.widget.WidgetChild;
 
 /**
@@ -42,7 +42,7 @@ public class ExchangeStrategy implements Condition, Task {
             if (Widgets.get(278, 16).getChildren()[2].interact("Buy"))
                 Time.sleep(Random.nextInt(100, 300));
         } else {
-            final Npc merchant = Npcs.getNearest(694);
+            final NPC merchant = NPCs.getNearest(694);
             if (merchant != null) {
                 if (merchant.isOnScreen()) {
                     if (merchant.interact("Trade")) {
