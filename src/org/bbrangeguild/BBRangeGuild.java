@@ -12,6 +12,7 @@ import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
+import org.powerbot.game.api.methods.Environment;
 import org.powerbot.game.api.methods.Game;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;
@@ -126,7 +127,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 if (Game.isLoggedIn() && Players.getLocal() != null && Players.getLocal().isOnScreen() && !Widgets.get(1252, 1).isVisible() && !Widgets.get(1234, 10).isVisible()) {
                     String money;
                     if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null) && parseMultiplier(money) > 200) {
-                        labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpg", ".jpg");
+                        labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", ".jpeg");
                         price = GeItem.lookup(892).getPrice();
 
                         if (Inventory.getCount(1464) > 0)
@@ -187,6 +188,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     @Override
     public void onStop() {
         if (startTime != 0) {
+            Environment.saveScreenCapture();
             final int gainedXP = skillData.getGainedXP();
             final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
             final int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
@@ -236,7 +238,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         final Graphics2D g = (Graphics2D) graphics;
         g.setRenderingHints(RENDERING_HINTS);
         final WidgetChild chatbox = Widgets.get(137, 0);
-        if (Game.isLoggedIn() && chatbox.getAbsoluteX() > 0 && chatbox.getAbsoluteY() > 0) {
+        if (skillData != null && Game.isLoggedIn() && chatbox.getAbsoluteX() > 0 && chatbox.getAbsoluteY() > 0) {
             absoluteY = chatbox.getAbsoluteY() - 1;
 
             if (!mainHidden) {
