@@ -1,18 +1,16 @@
 package org.bbrangeguild;
 
-import org.bbrangeguild.strategy.CombatStrategy;
-import org.bbrangeguild.strategy.CompeteStrategy;
-import org.bbrangeguild.strategy.EquipStrategy;
-import org.bbrangeguild.strategy.ShootStrategy;
+import org.bbrangeguild.strategy.*;
+import org.bbrangeguild.ui.BBRangeGuildGUI;
 import org.bbrangeguild.util.GeItem;
 import org.bbrangeguild.util.MousePathPoint;
 import org.bbrangeguild.util.SkillData;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
+import org.powerbot.concurrent.strategy.StrategyGroup;
 import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
-import org.powerbot.game.api.methods.Environment;
 import org.powerbot.game.api.methods.Game;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;
@@ -42,19 +40,19 @@ import java.util.LinkedList;
 @Manifest(name = "BBRangeGuild",
         authors = "BOOM BOOM",
         version = 1.0D,
-        description = "TODO",
-        premium = true)
+        description = "TODO")
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
-    private int startTickets, targetMessage, gamesCompleted, absoluteY, price;
+    private int startTickets, targetMessage, gamesCompleted, absoluteY, price, exchangeMode, amount;
     private long startTime;
-    private boolean mainHidden, barHidden, combatInitialized;
+    private boolean mainHidden, barHidden, combatInitialized, spamClick, equipArrows, antiban, mouseAnti, skillAnti, afkMode;
     private String status = "Loading...";
-    private Strategy setupStrategy;
+    private Strategy setupStrategy, handler;
     private BufferedImage labelPic;
     private Point centralPoint;
     private SkillData skillData;
-    private static final DecimalFormat format = new DecimalFormat("#,##0.#");
+    private BBRangeGuildGUI gui;
+    private static final DecimalFormat FORMAT = new DecimalFormat("0.#");
     private static final RenderingHints RENDERING_HINTS = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Font ARIAL_12_BOLD = new Font("Arial", Font.BOLD, 12), ARIAL_12 = new Font("Arial", Font.PLAIN, 12);
     private static final Color BACKGROUND = new Color(194, 178, 146), GREEN = new Color(32, 95, 0);
@@ -69,7 +67,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             final File file = new File("./BBRangeGuild/resources/", name);
 
             if (!file.exists()) {
-                log.info(file.getAbsolutePath());
                 final BufferedImage image = ImageIO.read(new java.net.URL(URL));
                 ImageIO.write(image, format, file);
                 return image;
@@ -98,12 +95,44 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
        return centralPoint;
     }
 
-    public void setCentralPoint(final Point centralPoint) {
-        this.centralPoint = centralPoint;
-    }
-
     public boolean isCombatInitialized() {
         return combatInitialized;
+    }
+
+    public boolean isSpamClicking() {
+        return spamClick;
+    }
+
+    public boolean isEquipingArrows() {
+        return equipArrows;
+    }
+
+    public boolean isAntiban() {
+        return antiban;
+    }
+
+    public boolean isMouseAntiban() {
+        return mouseAnti;
+    }
+
+    public boolean isSkillAntiban() {
+        return skillAnti;
+    }
+
+    public boolean isAfkMode() {
+        return afkMode;
+    }
+
+    public int getExchangeMode() {
+        return exchangeMode;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setCentralPoint(final Point centralPoint) {
+        this.centralPoint = centralPoint;
     }
 
     public void setCombatInitialized(final boolean combatInitialized) {
@@ -114,44 +143,40 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         this.status = status;
     }
 
+    public void setSpamClicking(final boolean spamClick) {
+        this.spamClick = spamClick;
+    }
+
+    public void setEquipingArrows(final boolean equipArrows) {
+        this.equipArrows = equipArrows;
+    }
+
+    public void setAntiban(final boolean antiban) {
+        this.antiban = antiban;
+    }
+
+    public void setMouseAntiban(final boolean mouseAnti) {
+        this.mouseAnti = mouseAnti;
+    }
+
+    public void setSkillAntiban(final boolean skillAnti) {
+        this.skillAnti = skillAnti;
+    }
+
+    public void setAfkMode(final boolean afkMode) {
+        this.afkMode = afkMode;
+    }
+
+    public void setExchangeMode(final int exchangeMode) {
+        this.exchangeMode = exchangeMode;
+    }
+
+    public void setAmount (final int amount) {
+        this.amount = amount;
+    }
+
     @Override
     protected void setup() {
-        setupStrategy = new Strategy(new Condition() {
-            @Override
-            public boolean validate() {
-                return true;
-            }
-        }, new Task() {
-            @Override
-            public void run() {
-                if (Game.isLoggedIn() && Players.getLocal() != null && Players.getLocal().isOnScreen() && !Widgets.get(1252, 1).isVisible() && !Widgets.get(1234, 10).isVisible()) {
-                    String money;
-                    if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null) && parseMultiplier(money) > 200) {
-                        labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", ".jpeg");
-                        price = GeItem.lookup(892).getPrice();
-
-                        if (Inventory.getCount(1464) > 0)
-                            startTickets = Inventory.getCount(true, 1464);
-
-                        if (Widgets.get(325, 40).isVisible()) {
-                            if (Widgets.get(325, 40).click(true)) {
-                                for (int i = 0; i < 20 && Widgets.get(325, 40).isVisible(); i++)
-                                    Time.sleep(100);
-                            }
-                        }
-
-                        skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
-                        revoke(setupStrategy);
-                    } else {
-                        log.info("You do not have any coins with you.");
-                        stop();
-                    }
-                }
-            }
-        });
-
-        //final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
-        //provide(new Strategy(exchangeStrategy, exchangeStrategy));
         final Strategy camera = new Strategy(new Condition() {
             @Override
             public boolean validate() {
@@ -173,22 +198,98 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         final EquipStrategy equipStrategy = new EquipStrategy(this);
         final CompeteStrategy competeStrategy = new CompeteStrategy(this);
         final ShootStrategy shootStrategy = new ShootStrategy(this);
+        final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
+        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { combatStrategy, new Strategy(equipStrategy, equipStrategy), camera, combatStrategy,
+                new Strategy(shootStrategy, shootStrategy) });
+
+        setupStrategy = new Strategy(new Condition() {
+            @Override
+            public boolean validate() {
+                return true;
+            }
+        }, new Task() {
+            @Override
+            public void run() {
+                if (Game.isLoggedIn() && Players.getLocal() != null && Players.getLocal().isOnScreen() && !Widgets.get(1252, 1).visible() && !Widgets.get(1234, 10).visible()) {
+                    String money;
+                    if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 204).visible() && (money = Widgets.get(548, 204).getText()) != null && parseMultiplier(money) > 200) {
+                        labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", ".jpeg");
+
+                        if (Inventory.getCount(1464) > 0)
+                            startTickets = Inventory.getCount(true, 1464);
+
+                        if (Widgets.get(325, 40).visible()) {
+                            if (Widgets.get(325, 40).click(true)) {
+                                for (int i = 0; i < 20 && Widgets.get(325, 40).visible(); i++)
+                                    Time.sleep(100);
+                            }
+                        }
+
+                        gui = new BBRangeGuildGUI();
+                        gui.setVisible(true);
+
+                        while (gui.isRunning() && gui.isVisible())
+                            Time.sleep(100);
+                        if (gui.isRunning()) {
+                            gui.dispose();
+                            stop();
+                        }
+
+                        if (gui.isCompeting()) {
+                            setSpamClicking(gui.isSpamClicking());
+                            setEquipingArrows(gui.isEquipingArrows());
+                            setAntiban(gui.isAntiban());
+                            setMouseAntiban(gui.isMouseAntiban());
+                            setSkillAntiban(gui.isSkillAntiban());
+                            setAfkMode(gui.isAfkMode());
+                        } else {
+                            setExchangeMode(gui.getExchangeMode());
+                            setAmount(gui.getAmount());
+                        }
+
+                        price = GeItem.lookup(892).getPrice();
+                        skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
+                        revoke(setupStrategy);
+                    } else {
+                        log.info("You do not have any coins with you.");
+                        stop();
+                    }
+                }
+            }
+        });
+
+        handler = new Strategy(new Condition() {
+            @Override
+            public boolean validate() {
+                return true;
+            }
+        }, new Task() {
+            @Override
+            public void run() {
+                if (!gui.isRunning()) {
+                    if (gui.isCompeting())
+                        revoke(exchangeStrategy);
+                    else
+                        revoke(groupCompete);
+                    revoke(handler);
+                }
+            }
+        });
 
         setupStrategy.setReset(true);
+        handler.setReset(true);
         combatStrategy.setReset(true);
         competeStrategy.setReset(true);
         provide(setupStrategy);
-        provide(combatStrategy);
-        provide(new Strategy(equipStrategy, equipStrategy));
-        provide(camera);
-        provide(competeStrategy);
-        provide(new Strategy(shootStrategy, shootStrategy));
+        provide(handler);
+        provide(groupCompete);
+        provide(exchangeStrategy);
     }
 
     @Override
     public void onStop() {
         if (startTime != 0) {
-            Environment.saveScreenCapture();
+            //Environment.saveScreenCapture();
             final int gainedXP = skillData.getGainedXP();
             final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
             final int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
@@ -242,7 +343,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             absoluteY = chatbox.getAbsoluteY() - 1;
 
             if (!mainHidden) {
-                g.setColor(new Color(194, 178, 146));
+                g.setColor(BACKGROUND);
                 g.fillRect(6, absoluteY, 506, chatbox.getHeight());
 
                 g.setFont(ARIAL_12_BOLD);
@@ -266,7 +367,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.drawString("" + formatCommas((int) profit - (gamesCompleted * 200)), 100, absoluteY + 51);
                 g.drawString("" + formatCommas(gainedXP), 100, absoluteY + 66);
                 g.drawString("" + formatCommas(gainedTickets), 100, absoluteY + 81);
-                g.drawString("" + format.format(gamesCompleted), 100, absoluteY + 96);
+                g.drawString("" + formatCommas(gamesCompleted), 100, absoluteY + 96);
 
                 final int eph = (int) (gainedXP * 3600000D / runTime);
                 final int tph = (int) (gainedTickets * 3600000D / runTime);
@@ -294,8 +395,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 final int eph = (int) (skillData.getGainedXP() * 3600000D / (System.currentTimeMillis() - startTime));
                 final long ttl = (long) ((skillData.getExperienceToLevel() * 3600000D) / eph);
                 String levelInfo = percent + "% To Level "
-                        + (Skills.getRealLevel(Skills.RANGE) == 99 ? 99 : Skills.getRealLevel(Skills.RANGE)) + " (" + skillData.getGainedLevels()
-                        + " Gained)" + " - " + format.format(skillData.getExperienceToLevel() / 1000D) + "K XP - "
+                        + (Skills.getRealLevel(Skills.RANGE) == 99 ? 99 : Skills.getRealLevel(Skills.RANGE) + 1) + " (" + skillData.getGainedLevels()
+                        + " Gained)" + " - " + FORMAT.format(skillData.getExperienceToLevel() / 1000D) + "K XP - "
                         + (eph > 0 && startTime != 0 ? Time.format(ttl) : "Calculating...") + " TTL";
 
                 g.setColor(new Color(0, 127, 14, 200));

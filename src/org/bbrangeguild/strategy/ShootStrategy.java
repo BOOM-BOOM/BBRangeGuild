@@ -57,18 +57,32 @@ public class ShootStrategy implements Condition, Task {
                     return;
                 }
 
-                if (interact(target, "Fire-at", Widgets.get(325, 40).isVisible()))
-                    fails = 0;
+                if (script.isSpamClicking()) {
+                    if (interact(target, "Fire-at", Widgets.get(325, 40).visible()))
+                        fails = 0;
 
-                if (fails > 5) {
-                    if (Widgets.get(325, 40).isVisible()) {
+                    if (fails > 5) {
+                        if (Widgets.get(325, 40).visible()) {
+                            if (Widgets.get(325, 40).click(true)) {
+                                for (int i = 0; i < 20 && Widgets.get(325, 40).visible(); i++)
+                                    Time.sleep(100);
+                            }
+                        }
+                    } else if (Widgets.get(325, 40).visible())
+                        fails++;
+                } else {
+                    if (interact(target, "Fire-at", false)) {
+                        for (int i = 0; i < 30 && !Widgets.get(325, 40).visible(); i++)
+                            Time.sleep(100);
+                    }
+
+                    if (Widgets.get(325, 40).visible()) {
                         if (Widgets.get(325, 40).click(true)) {
-                            for (int i = 0; i < 20 && Widgets.get(325, 40).isVisible(); i++)
+                            for (int i = 0; i < 20 && Widgets.get(325, 40).visible(); i++)
                                 Time.sleep(100);
                         }
                     }
-                } else if (Widgets.get(325, 40).isVisible())
-                    fails++;
+                }
             } else
                 Camera.turnTo(target);
         }

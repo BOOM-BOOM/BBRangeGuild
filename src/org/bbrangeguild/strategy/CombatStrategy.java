@@ -39,9 +39,9 @@ public class CombatStrategy extends Strategy implements Condition, Task {
             script.setCombatInitialized(true);
 
         if (Game.getPlane() == 0) {
-            if (Widgets.get(564, 0).isVisible()) {
+            if (Widgets.get(564, 0).visible()) {
                 if (Widgets.get(564, 15).click(true)) {
-                    for (int i = 0; i < 25 && Widgets.get(564, 0).isVisible(); i++)
+                    for (int i = 0; i < 25 && Widgets.get(564, 0).visible(); i++)
                         Time.sleep(100);
                 }
             } else {
@@ -49,7 +49,7 @@ public class CombatStrategy extends Strategy implements Condition, Task {
                 if (ladder != null) {
                     if (Calculations.distance(Players.getLocal().getLocation(), ladder.getLocation()) < 8 && ladder.isOnScreen()) {
                         if (ladder.interact("Climb-up")) {
-                            for (int i = 0; i < 25 && Game.getPlane() == 0 && !Widgets.get(564, 0).isVisible(); i++)
+                            for (int i = 0; i < 25 && Game.getPlane() == 0 && !Widgets.get(564, 0).visible(); i++)
                                 Time.sleep(100);
                         }
                     } else if (Calculations.distance(Players.getLocal().getLocation(), ladder.getLocation()) < 8 && !ladder.isOnScreen())

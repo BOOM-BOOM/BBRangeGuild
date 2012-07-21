@@ -22,7 +22,7 @@ public class EquipStrategy implements Condition, Task {
     @Override
     public boolean validate() {
         String text;
-        return Widgets.get(1184, 13).isVisible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("bronze arrows");
+        return script.isEquipingArrows() ||  Widgets.get(1184, 13).visible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("bronze arrows");
     }
 
     @Override

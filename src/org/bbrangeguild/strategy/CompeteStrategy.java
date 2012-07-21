@@ -25,20 +25,20 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
 
     @Override
     public boolean validate() {
-        return Settings.get(156) == 0 || Widgets.get(1184, 0).isVisible() || Widgets.get(1188, 3).isVisible();
+        return Settings.get(156) == 0 || Widgets.get(1184, 0).visible() || Widgets.get(1188, 3).visible();
     }
 
     @Override
     public void run() {
         String money;
-        if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).isVisible() && (money = Widgets.get(548, 196).getText()) != null) && script.parseMultiplier(money) > 200) {
-            if (!Widgets.get(1188, 3).isVisible()) {
+        if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).visible() && (money = Widgets.get(548, 196).getText()) != null) && script.parseMultiplier(money) > 200) {
+            if (!Widgets.get(1188, 3).visible()) {
                 script.setStatus("Talking To Judge...");
                 final NPC judge = NPCs.getNearest(693);
                 if (judge != null) {
                     if (judge.isOnScreen()) {
                         if (judge.interact("Compete")) {
-                            for (int i = 0; i < 20 && !Widgets.get(1188, 3).isVisible(); i++)
+                            for (int i = 0; i < 20 && !Widgets.get(1188, 3).visible(); i++)
                                 Time.sleep(100);
                         }
                     } else
@@ -46,11 +46,11 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
                 }
             }
 
-            if (Widgets.get(1188, 3).isVisible()) {
+            if (Widgets.get(1188, 3).visible()) {
                 script.setStatus("Paying Judge...");
                 script.setCentralPoint(null);
                 if (Widgets.get(1188, 3).click(true)) {
-                    for (int i = 0; i < 25 && Widgets.get(1188, 3).isVisible(); i++)
+                    for (int i = 0; i < 25 && Widgets.get(1188, 3).visible(); i++)
                         Time.sleep(100);
                 }
             }

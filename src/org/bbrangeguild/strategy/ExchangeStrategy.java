@@ -3,6 +3,7 @@ package org.bbrangeguild.strategy;
 import org.bbrangeguild.BBRangeGuild;
 import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
+import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.interactive.NPCs;
 import org.powerbot.game.api.methods.interactive.Players;
@@ -15,7 +16,7 @@ import org.powerbot.game.api.wrappers.widget.WidgetChild;
 /**
  * @author BOOM BOOM
  */
-public class ExchangeStrategy implements Condition, Task {
+public class ExchangeStrategy extends Strategy implements Condition, Task {
 
     private BBRangeGuild script;
 
@@ -30,23 +31,25 @@ public class ExchangeStrategy implements Condition, Task {
 
     @Override
     public void run() {
-        if (Widgets.get(278, 0).isVisible() &&  Widgets.get(512, 0).isVisible()) {
+        if (Widgets.get(278, 0).visible() &&  Widgets.get(512, 0).visible()) {
+            script.setStatus("Exchanging...");
             for (final WidgetChild widgetChild : Widgets.get(512, 0).getChildren()) {
-                if (widgetChild.getChildId() == 1464 && widgetChild.getChildStackSize() < 1020) {
+                if (widgetChild.getChildId() == 1464 && script.getAmount() > 0 ? widgetChild.getChildStackSize() >= script.getAmount() : widgetChild.getChildStackSize() < 1020) {
                     script.log.info("You do not have enough tickets to exchange.");
                     script.stop();
                     return;
                 }
             }
 
-            if (Widgets.get(278, 16).getChildren()[2].interact("Buy"))
+            if (Widgets.get(278, 16).getChildren()[script.getExchangeMode() + 1].interact("Buy"))
                 Time.sleep(Random.nextInt(100, 300));
         } else {
+            script.setStatus("Trading...");
             final NPC merchant = NPCs.getNearest(694);
             if (merchant != null) {
                 if (merchant.isOnScreen()) {
                     if (merchant.interact("Trade")) {
-                        for (int i = 0; i < 25 && !Widgets.get(278, 0).isVisible() && !Widgets.get(512, 0).isVisible(); i++) {
+                        for (int i = 0; i < 25 && !Widgets.get(278, 0).visible() && !Widgets.get(512, 0).visible(); i++) {
                             if (Players.getLocal().isMoving())
                                 i = 0;
                             Time.sleep(100);
