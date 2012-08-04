@@ -18,6 +18,7 @@ import org.powerbot.game.api.wrappers.widget.WidgetChild;
  */
 public class ExchangeStrategy extends Strategy implements Condition, Task {
 
+    private int child;
     private BBRangeGuild script;
 
     public ExchangeStrategy(final BBRangeGuild script) {
@@ -41,7 +42,14 @@ public class ExchangeStrategy extends Strategy implements Condition, Task {
                 }
             }
 
-            if (Widgets.get(278, 16).getChildren()[script.getExchangeMode() + 1].interact("Buy"))
+            if (script.getExchangeMode() == 0)
+                child = 0;
+            else if (script.getExchangeMode() == 1)
+                child = 2;
+            else if (script.getExchangeMode() == 2)
+                child = 5;
+
+            if (Widgets.get(278, 16).getChild(child).interact("Buy"))
                 Time.sleep(Random.nextInt(100, 300));
         } else {
             script.setStatus("Trading...");

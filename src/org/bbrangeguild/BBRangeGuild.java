@@ -11,6 +11,7 @@ import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.concurrent.strategy.StrategyGroup;
 import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
+import org.powerbot.game.api.methods.Environment;
 import org.powerbot.game.api.methods.Game;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;
@@ -32,7 +33,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -40,7 +40,8 @@ import java.util.LinkedList;
 @Manifest(name = "BBRangeGuild",
         authors = "BOOM BOOM",
         version = 1.0D,
-        description = "TODO")
+        description = "The ultimate Range Guild script! Over a year in experience!",
+        website = "http://www.powerbot.org")
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
     private int startTickets, targetMessage, gamesCompleted, absoluteY, price, exchangeMode, amount;
@@ -63,17 +64,14 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     }
 
     private BufferedImage getImage(final String name, final String URL, final String format) {
+        final File file = new File(Environment.getStorageDirectory().getAbsolutePath(), name);
         try {
-            final File file = new File("./BBRangeGuild/resources/", name);
-
             if (!file.exists()) {
                 final BufferedImage image = ImageIO.read(new java.net.URL(URL));
                 ImageIO.write(image, format, file);
                 return image;
             } else
                 return ImageIO.read(file);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -199,7 +197,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         final CompeteStrategy competeStrategy = new CompeteStrategy(this);
         final ShootStrategy shootStrategy = new ShootStrategy(this);
         final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
-        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { combatStrategy, new Strategy(equipStrategy, equipStrategy), camera, combatStrategy,
+        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { combatStrategy, new Strategy(equipStrategy, equipStrategy), camera, competeStrategy,
                 new Strategy(shootStrategy, shootStrategy) });
 
         setupStrategy = new Strategy(new Condition() {
@@ -212,8 +210,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             public void run() {
                 if (Game.isLoggedIn() && Players.getLocal() != null && Players.getLocal().isOnScreen() && !Widgets.get(1252, 1).visible() && !Widgets.get(1234, 10).visible()) {
                     String money;
-                    if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 204).visible() && (money = Widgets.get(548, 204).getText()) != null && parseMultiplier(money) > 200) {
-                        labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", ".jpeg");
+                    if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 200).visible() && (money = Widgets.get(548, 200).getText()) != null && parseMultiplier(money) > 200) {
+                        labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", "jpeg");
 
                         if (Inventory.getCount(1464) > 0)
                             startTickets = Inventory.getCount(true, 1464);
@@ -250,6 +248,10 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         price = GeItem.lookup(892).getPrice();
                         skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
                         revoke(setupStrategy);
+                    } else if (!Widgets.get(548, 200).visible()) {
+                        Mouse.click(532, 146, true);
+                        for (int i = 0; i < 20 && !Widgets.get(548, 200).visible(); i++)
+                            Time.sleep(100);
                     } else {
                         log.info("You do not have any coins with you.");
                         stop();

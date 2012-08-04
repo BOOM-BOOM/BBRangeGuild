@@ -6,6 +6,7 @@ import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.methods.Settings;
 import org.powerbot.game.api.methods.Widgets;
+import org.powerbot.game.api.methods.input.Mouse;
 import org.powerbot.game.api.methods.interactive.NPCs;
 import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.widget.Camera;
@@ -31,7 +32,7 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
     @Override
     public void run() {
         String money;
-        if (Inventory.getCount(995) > 200 || (Widgets.get(548, 196).visible() && (money = Widgets.get(548, 196).getText()) != null) && script.parseMultiplier(money) > 200) {
+        if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 200).visible() && (money = Widgets.get(548, 200).getText()) != null && script.parseMultiplier(money) > 200) {
             if (!Widgets.get(1188, 3).visible()) {
                 script.setStatus("Talking To Judge...");
                 final NPC judge = NPCs.getNearest(693);
@@ -54,8 +55,12 @@ public class CompeteStrategy extends Strategy implements Condition, Task {
                         Time.sleep(100);
                 }
             }
+        } else if (!Widgets.get(548, 200).visible()) {
+            Mouse.click(532, 146, true);
+            for (int i = 0; i < 20 && !Widgets.get(548, 200).visible(); i++)
+                Time.sleep(100);
         } else {
-            script.log.info("You have ran out of money!");
+            script.log.info("You do not have any coins with you.");
             script.stop();
         }
     }

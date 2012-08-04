@@ -36,7 +36,7 @@ public class EquipStrategy implements Condition, Task {
                     return;
                 }
             }
-        } else {
+        } else if (!script.isEquipingArrows()) {
             script.log.info("You do not have any more arrows.");
             script.stop();
         }
