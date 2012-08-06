@@ -2,6 +2,7 @@ package org.bbrangeguild;
 
 import org.bbrangeguild.strategy.*;
 import org.bbrangeguild.ui.BBRangeGuildGUI;
+import org.bbrangeguild.util.ExchangeItem;
 import org.bbrangeguild.util.GeItem;
 import org.bbrangeguild.util.MousePathPoint;
 import org.bbrangeguild.util.SkillData;
@@ -13,6 +14,7 @@ import org.powerbot.game.api.ActiveScript;
 import org.powerbot.game.api.Manifest;
 import org.powerbot.game.api.methods.Environment;
 import org.powerbot.game.api.methods.Game;
+import org.powerbot.game.api.methods.Tabs;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.input.Mouse;
 import org.powerbot.game.api.methods.interactive.Players;
@@ -21,6 +23,7 @@ import org.powerbot.game.api.methods.tab.Skills;
 import org.powerbot.game.api.methods.widget.Camera;
 import org.powerbot.game.api.util.Random;
 import org.powerbot.game.api.util.Time;
+import org.powerbot.game.api.util.Timer;
 import org.powerbot.game.api.wrappers.widget.WidgetChild;
 import org.powerbot.game.bot.event.MessageEvent;
 import org.powerbot.game.bot.event.listener.MessageListener;
@@ -44,15 +47,17 @@ import java.util.LinkedList;
         website = "http://www.powerbot.org")
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
-    private int startTickets, targetMessage, gamesCompleted, absoluteY, price, exchangeMode, amount;
+    private int startItems, targetMessage, gamesCompleted, absoluteY, price, exchangeMode, amount, ticketCount;
     private long startTime;
-    private boolean mainHidden, barHidden, combatInitialized, spamClick, equipArrows, antiban, mouseAnti, skillAnti, afkMode;
+    private boolean mainHidden, barHidden, combatInitialized, spamClick, equipArrows, antiban, mouseAnti, skillAnti, afkMode, checkingSkills;
     private String status = "Loading...";
     private Strategy setupStrategy, handler;
     private BufferedImage labelPic;
     private Point centralPoint;
     private SkillData skillData;
     private BBRangeGuildGUI gui;
+    private ExchangeItem exchangeItem;
+    private Timer antibanTimer = new Timer(Random.nextInt(300000, 900000));
     private static final DecimalFormat FORMAT = new DecimalFormat("0.#");
     private static final RenderingHints RENDERING_HINTS = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Font ARIAL_12_BOLD = new Font("Arial", Font.BOLD, 12), ARIAL_12 = new Font("Arial", Font.PLAIN, 12);
@@ -109,28 +114,12 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         return equipArrows;
     }
 
-    public boolean isAntiban() {
-        return antiban;
-    }
-
-    public boolean isMouseAntiban() {
-        return mouseAnti;
-    }
-
-    public boolean isSkillAntiban() {
-        return skillAnti;
-    }
-
-    public boolean isAfkMode() {
-        return afkMode;
-    }
-
-    public int getExchangeMode() {
-        return exchangeMode;
-    }
-
     public int getAmount() {
         return amount;
+    }
+
+    public ExchangeItem getExchangeItem() {
+        return exchangeItem;
     }
 
     public void setCentralPoint(final Point centralPoint) {
@@ -145,41 +134,58 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         this.status = status;
     }
 
-    public void setSpamClicking(final boolean spamClick) {
-        this.spamClick = spamClick;
-    }
-
-    public void setEquipingArrows(final boolean equipArrows) {
-        this.equipArrows = equipArrows;
-    }
-
-    public void setAntiban(final boolean antiban) {
-        this.antiban = antiban;
-    }
-
-    public void setMouseAntiban(final boolean mouseAnti) {
-        this.mouseAnti = mouseAnti;
-    }
-
-    public void setSkillAntiban(final boolean skillAnti) {
-        this.skillAnti = skillAnti;
-    }
-
-    public void setAfkMode(final boolean afkMode) {
-        this.afkMode = afkMode;
-    }
-
-    public void setExchangeMode(final int exchangeMode) {
-        this.exchangeMode = exchangeMode;
-    }
-
-    public void setAmount (final int amount) {
-        this.amount = amount;
+    private int getCount(final int id) {
+        if (Widgets.get(512, 0).visible()) {
+            for (WidgetChild widgetChild : Widgets.get(512, 0).getChildren()) {
+                if (widgetChild.getChildId() == id)
+                    return widgetChild.getChildStackSize();
+            }
+        }
+        return 0;
     }
 
     @Override
     protected void setup() {
-        final Strategy camera = new Strategy(new Condition() {
+        final Strategy antibanStrategy = new Strategy(new Condition() {
+            @Override
+            public boolean validate() {
+                return !antibanTimer.isRunning();
+            }
+        }, new Task() {
+            @Override
+            public void run() {
+                antibanTimer.setEndIn(Random.nextInt(300000, 900000));
+
+                if (mouseAnti && Random.nextInt(0, 100) <= 25) {
+                    Timer moveTimer = new Timer(Random.nextInt(500, 1500));
+                    while (moveTimer.isRunning())
+                        Mouse.move((int) Mouse.getLocation().getX() + Random.nextInt(-8, 8), (int) Mouse.getLocation().getY() + Random.nextInt(-8, 8));
+                }
+
+                if (skillAnti && Random.nextInt(0, 100) <= 25) {
+                    checkingSkills = true;
+                    if (!Tabs.getCurrent().equals(Tabs.STATS)) {
+                        Tabs.STATS.open();
+                        for (int i = 0; i < 20 && !Tabs.getCurrent().equals(Tabs.STATS); i++)
+                            Time.sleep(100);
+                    }
+
+                    if (Tabs.getCurrent().equals(Tabs.STATS)) {
+                        Widgets.get(320, 36).hover();
+                        Time.sleep(Random.nextInt(1400, 2100));
+                    }
+                    checkingSkills = false;
+                }
+
+                if (afkMode && Random.nextInt(0, 100) <= 50) {
+                    Timer afkTimer = new Timer(Random.nextInt(10000, 30000));
+                    while (afkTimer.isRunning())
+                        Time.sleep(100);
+                }
+            }
+        });
+
+        final Strategy cameraStrategy = new Strategy(new Condition() {
             @Override
             public boolean validate() {
                 final int yaw = Camera.getYaw();
@@ -201,7 +207,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         final CompeteStrategy competeStrategy = new CompeteStrategy(this);
         final ShootStrategy shootStrategy = new ShootStrategy(this);
         final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
-        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { combatStrategy, new Strategy(equipStrategy, equipStrategy), camera, competeStrategy,
+        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { combatStrategy, new Strategy(equipStrategy, equipStrategy), cameraStrategy, competeStrategy,
                 new Strategy(shootStrategy, shootStrategy) });
 
         setupStrategy = new Strategy(new Condition() {
@@ -218,7 +224,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", "jpeg");
 
                         if (Inventory.getCount(1464) > 0)
-                            startTickets = Inventory.getCount(true, 1464);
+                            ticketCount = startItems = Inventory.getCount(true, 1464);
 
                         if (Widgets.get(325, 40).visible()) {
                             if (Widgets.get(325, 40).click(true)) {
@@ -238,19 +244,35 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         }
 
                         if (gui.isCompeting()) {
-                            setSpamClicking(gui.isSpamClicking());
-                            setEquipingArrows(gui.isEquipingArrows());
-                            setAntiban(gui.isAntiban());
-                            setMouseAntiban(gui.isMouseAntiban());
-                            setSkillAntiban(gui.isSkillAntiban());
-                            setAfkMode(gui.isAfkMode());
+                            spamClick = gui.isSpamClicking();
+                            equipArrows = gui.isEquipingArrows();
+                            antiban = gui.isAntiban();
+                            mouseAnti = gui.isMouseAntiban();
+                            skillAnti = gui.isSkillAntiban();
+                            afkMode = gui.isAfkMode();
+                            skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
                         } else {
-                            setExchangeMode(gui.getExchangeMode());
-                            setAmount(gui.getAmount());
+                            exchangeMode = gui.getExchangeMode();
+                            amount = gui.getAmount();
+                            
+                            if (exchangeMode == 0)
+                                exchangeItem = new ExchangeItem(0, 114, 47);
+                            else if (exchangeMode == 1)
+                                exchangeItem = new ExchangeItem(2, 1020, 892);
+                            else if (exchangeMode == 2)
+                                exchangeItem = new ExchangeItem(5, 292, 829);
+                            
+                            if (Inventory.getCount(exchangeItem.getItemId()) > 0)
+                                startItems = Inventory.getCount(true, exchangeItem.getItemId());
+                            else if (getCount(exchangeItem.getItemId()) > 0)
+                                startItems = getCount(exchangeItem.getItemId());
+                            
+                            startTime = System.currentTimeMillis();
                         }
 
-                        price = GeItem.lookup(892).getPrice();
-                        skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
+                        price = GeItem.lookup(gui.isCompeting() ? 892 : exchangeItem.getItemId()).getPrice();
+                        if (antiban)
+                            antibanTimer.reset();
                         revoke(setupStrategy);
                     } else if (!Widgets.get(548, 200).visible()) {
                         Mouse.click(532, 146, true);
@@ -277,6 +299,9 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         revoke(exchangeStrategy);
                     else
                         revoke(groupCompete);
+
+                    if (!antiban)
+                        revoke(antibanStrategy);
                     revoke(handler);
                 }
             }
@@ -288,6 +313,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         competeStrategy.setReset(true);
         provide(setupStrategy);
         provide(handler);
+        provide(antibanStrategy);
         provide(groupCompete);
         provide(exchangeStrategy);
     }
@@ -295,9 +321,8 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     @Override
     public void onStop() {
         if (startTime != 0) {
-            //Environment.saveScreenCapture();
             final int gainedXP = skillData.getGainedXP();
-            final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
+            final int gainedTickets = Inventory.getCount(true, 1464) - startItems;
             final int eph = (int) (gainedXP * 3600000D / (System.currentTimeMillis() - startTime));
             final int tph = (int) (gainedTickets * 3600000D / (System.currentTimeMillis() - startTime));
             final double profit = (gainedTickets != 0 ? gainedTickets / 20.4 * price : 0);
@@ -353,9 +378,9 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
     @Override
     public void onRepaint(Graphics graphics) {
-        final Graphics2D g = (Graphics2D) graphics;
+        Graphics2D g = (Graphics2D) graphics;
         g.setRenderingHints(RENDERING_HINTS);
-        final WidgetChild chatbox = Widgets.get(137, 0);
+        WidgetChild chatbox = Widgets.get(137, 0);
         if (skillData != null && Game.isLoggedIn() && chatbox.getAbsoluteX() > 0 && chatbox.getAbsoluteY() > 0) {
             absoluteY = chatbox.getAbsoluteY() - 1;
 
@@ -365,7 +390,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
                 g.setFont(ARIAL_12_BOLD);
                 g.setColor(Color.BLACK);
-                final long runTime = skillData.getElapsedTime();
+                long runTime = skillData.getElapsedTime();
                 g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Waiting..."), 12, absoluteY + 17);
                 g.drawString("Current State: " + status, 158, absoluteY + 17);
 
@@ -378,18 +403,18 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
                 g.setFont(ARIAL_12);
                 g.setColor(Color.BLACK);
-                final int gainedXP = skillData.getGainedXP();
-                final int gainedTickets = Inventory.getCount(true, 1464) - startTickets;
-                final double profit = gainedTickets / 20.4 * price;
+                int gainedXP = skillData.getGainedXP();
+                int gainedTickets = (checkingSkills ? ticketCount - startItems : (ticketCount = Inventory.getCount(true, 1464)) - startItems);
+                double profit = gainedTickets == 0 ? 0 : gainedTickets / 20.4 * price;
                 g.drawString("" + formatCommas((int) profit - (gamesCompleted * 200)), 100, absoluteY + 51);
                 g.drawString("" + formatCommas(gainedXP), 100, absoluteY + 66);
                 g.drawString("" + formatCommas(gainedTickets), 100, absoluteY + 81);
                 g.drawString("" + formatCommas(gamesCompleted), 100, absoluteY + 96);
 
-                final int eph = (int) (gainedXP * 3600000D / runTime);
-                final int tph = (int) (gainedTickets * 3600000D / runTime);
-                final int pph = (int) (profit * 3600000D / runTime);
-                final int gph = (int) (gamesCompleted * 3600000D / runTime);
+                int eph = (int) (gainedXP * 3600000D / runTime);
+                int tph = (int) (gainedTickets * 3600000D / runTime);
+                int pph = (int) (profit * 3600000D / runTime);
+                int gph = (int) (gamesCompleted * 3600000D / runTime);
                 g.drawString("(" + formatCommas(pph - (gph * 200)) + "/H)", 158, absoluteY + 51);
                 g.drawString("(" + formatCommas(eph) + "/H)", 158, absoluteY + 66);
                 g.drawString("(" + formatCommas(tph) + "/H)", 158, absoluteY + 81);
@@ -408,9 +433,9 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setColor(new Color(255, 219, 130));
                 g.fillRect(5, absoluteY - 25, 510, 16);
 
-                final int percent = Skills.getRealLevel(Skills.RANGE) == 99 ? 100 : skillData.getPercentToNextLevel();
-                final int eph = (int) (skillData.getGainedXP() * 3600000D / (System.currentTimeMillis() - startTime));
-                final long ttl = (long) ((skillData.getExperienceToLevel() * 3600000D) / eph);
+                int percent = Skills.getRealLevel(Skills.RANGE) == 99 ? 100 : skillData.getPercentToNextLevel();
+                int eph = (int) (skillData.getGainedXP() * 3600000D / (System.currentTimeMillis() - startTime));
+                long ttl = (long) ((skillData.getExperienceToLevel() * 3600000D) / eph);
                 String levelInfo = percent + "% To Level "
                         + (Skills.getRealLevel(Skills.RANGE) == 99 ? 99 : Skills.getRealLevel(Skills.RANGE) + 1) + " (" + skillData.getGainedLevels()
                         + " Gained)" + " - " + FORMAT.format(skillData.getExperienceToLevel() / 1000D) + "K XP - "
@@ -423,6 +448,38 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 g.setFont(ARIAL_12_BOLD);
                 g.setColor(new Color(33, 28, 28));
                 g.drawString(levelInfo, absoluteY - 99 - ((int) g.getFontMetrics().getStringBounds(levelInfo, g).getWidth() / 2), absoluteY - 12);
+            } else if (!gui.isCompeting() && Game.isLoggedIn() && chatbox.getAbsoluteX() > 0 && chatbox.getAbsoluteY() > 0) {
+                absoluteY = chatbox.getAbsoluteY() - 1;
+
+                if (!mainHidden) {
+                    g.setColor(BACKGROUND);
+                    g.fillRect(6, absoluteY, 506, chatbox.getHeight());
+
+                    g.setFont(ARIAL_12_BOLD);
+                    g.setColor(Color.BLACK);
+                    long runTime = System.currentTimeMillis() -  startTime;
+                    g.drawString("Time Running: " + (startTime != 0 ? Time.format(runTime) : "Waiting..."), 12, absoluteY + 17);
+                    g.drawString("Current State: " + status, 158, absoluteY + 17);
+
+                    g.setColor(GREEN);
+                    g.drawString("Profit", 12, absoluteY + 36);
+                    g.drawString("Bought:", 12, absoluteY + 51);
+                    g.drawString("Item Price:", 12, absoluteY + 66);
+                    g.drawString("Buys Left:", 12, absoluteY + 81);
+
+                    g.setFont(ARIAL_12);
+                    g.setColor(Color.BLACK);
+
+                    int boughtItems = getCount(exchangeItem.getItemId()) - startItems;
+                    int profit = boughtItems * price;
+                    int buysLeft = getCount(1464) / exchangeItem.getValue();
+                    g.drawString("" + formatCommas(profit), 12, absoluteY + 36);
+                    g.drawString("" + formatCommas(boughtItems), 100, absoluteY + 51);
+                    g.drawString("" + formatCommas(price), 100, absoluteY + 66);
+                    g.drawString("" + formatCommas(buysLeft), 100, absoluteY + 81);
+
+                    g.drawImage(labelPic, 6, absoluteY, null);
+                }
             }
             drawMouse(g);
         }
