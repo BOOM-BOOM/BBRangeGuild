@@ -254,7 +254,7 @@ public class BBRangeGuildGUI extends JFrame {
                     } else {
                         final String amountText = amountBox.getText();
                         exchangeMode = itemExchange.getSelectedIndex();
-                        amount = amountText.equalsIgnoreCase("MAX") ? 0 : Integer.getInteger(amountText);
+                        amount = amountText.equalsIgnoreCase("MAX") ? 0 : Integer.parseInt(amountText);
                     }
 
                     isRunning = false;
