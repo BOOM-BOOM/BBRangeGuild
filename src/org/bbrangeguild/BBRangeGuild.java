@@ -51,7 +51,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     private long startTime;
     private boolean mainHidden, barHidden, combatInitialized, spamClick, equipArrows, antiban, mouseAnti, skillAnti, afkMode, checkingSkills;
     private String status = "Loading...";
-    private Strategy setupStrategy, handler;
+    private Strategy setupStrategy;
     private BufferedImage labelPic;
     private Point centralPoint;
     private SkillData skillData;
@@ -247,6 +247,12 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                             skillAnti = gui.isSkillAntiban();
                             afkMode = gui.isAfkMode();
                             skillData = new SkillData(Skills.RANGE, (startTime = System.currentTimeMillis()));
+
+                            if (antiban)
+                                antibanTimer.reset();
+                            else
+                                revoke(antibanStrategy);
+                            revoke(exchangeStrategy);
                         } else {
                             exchangeMode = gui.getExchangeMode();
                             amount = gui.getAmount();
@@ -263,12 +269,11 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                             else if (getCount(exchangeItem.getItemId()) > 0)
                                 startItems = getCount(exchangeItem.getItemId());
 
+                            revoke(groupCompete);
                             startTime = System.currentTimeMillis();
                         }
 
                         price = GeItem.lookup(gui.isCompeting() ? 892 : exchangeItem.getItemId()).getPrice();
-                        if (antiban)
-                            antibanTimer.reset();
                         revoke(setupStrategy);
                     } else if (!Widgets.get(548, 200).visible()) {
                         Mouse.click(532, 146, true);
@@ -282,33 +287,10 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             }
         });
 
-        handler = new Strategy(new Condition() {
-            @Override
-            public boolean validate() {
-                return true;
-            }
-        }, new Task() {
-            @Override
-            public void run() {
-                if (!gui.isRunning()) {
-                    if (gui.isCompeting())
-                        revoke(exchangeStrategy);
-                    else
-                        revoke(groupCompete);
-
-                    if (!antiban)
-                        revoke(antibanStrategy);
-                    revoke(handler);
-                }
-            }
-        });
-
         setupStrategy.setReset(true);
-        handler.setReset(true);
         combatStrategy.setReset(true);
         competeStrategy.setReset(true);
         provide(setupStrategy);
-        provide(handler);
         provide(antibanStrategy);
         provide(groupCompete);
         provide(exchangeStrategy);
