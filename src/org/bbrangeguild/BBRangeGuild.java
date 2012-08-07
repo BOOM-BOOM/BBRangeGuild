@@ -44,7 +44,7 @@ import java.util.LinkedList;
         authors = "BOOM BOOM",
         version = 1.0D,
         description = "The ultimate Range Guild script! Over a year in experience!",
-        website = "http://www.powerbot.org")
+        website = "https://www.powerbot.org/community/topic/679291-bbrangeguild-over-a-year-in-range-guilding-experience/")
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
     private int startItems, targetMessage, gamesCompleted, absoluteY, price, exchangeMode, amount, ticketCount;
@@ -62,11 +62,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     private static final RenderingHints RENDERING_HINTS = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Font ARIAL_12_BOLD = new Font("Arial", Font.BOLD, 12), ARIAL_12 = new Font("Arial", Font.PLAIN, 12);
     private static final Color BACKGROUND = new Color(194, 178, 146), GREEN = new Color(32, 95, 0);
-<<<<<<< HEAD
-    private static final LinkedList<MousePathPoint> mousePath = new LinkedList<MousePathPoint>();
-=======
     private static final LinkedList<MousePathPoint> MOUSE_PATH_POINTS = new LinkedList<MousePathPoint>();
->>>>>>> Initial commit.
 
     private String formatCommas(final int i) {
         return NumberFormat.getIntegerInstance().format(i);
@@ -99,7 +95,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     }
 
     public Point getCentralPoint() {
-       return centralPoint;
+        return centralPoint;
     }
 
     public boolean isCombatInitialized() {
@@ -254,19 +250,19 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         } else {
                             exchangeMode = gui.getExchangeMode();
                             amount = gui.getAmount();
-                            
+
                             if (exchangeMode == 0)
                                 exchangeItem = new ExchangeItem(0, 114, 47);
                             else if (exchangeMode == 1)
                                 exchangeItem = new ExchangeItem(2, 1020, 892);
                             else if (exchangeMode == 2)
                                 exchangeItem = new ExchangeItem(5, 292, 829);
-                            
+
                             if (Inventory.getCount(exchangeItem.getItemId()) > 0)
                                 startItems = Inventory.getCount(true, exchangeItem.getItemId());
                             else if (getCount(exchangeItem.getItemId()) > 0)
                                 startItems = getCount(exchangeItem.getItemId());
-                            
+
                             startTime = System.currentTimeMillis();
                         }
 
@@ -339,16 +335,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
     private void drawMouse(final Graphics g) {
         final Point location = Mouse.getLocation();
-<<<<<<< HEAD
-        while (!mousePath.isEmpty() && mousePath.peek().isUp())
-            mousePath.remove();
-        Point clientCursor = Mouse.getLocation();
-        MousePathPoint mpp = new MousePathPoint(clientCursor.x, clientCursor.y, 1500);
-        if (mousePath.isEmpty() || !mousePath.getLast().equals(mpp))
-            mousePath.add(mpp);
-        MousePathPoint lastPoint = null;
-        for (MousePathPoint a : mousePath) {
-=======
         while (!MOUSE_PATH_POINTS.isEmpty() && MOUSE_PATH_POINTS.peek().isUp())
             MOUSE_PATH_POINTS.remove();
         Point clientCursor = Mouse.getLocation();
@@ -357,7 +343,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             MOUSE_PATH_POINTS.add(mpp);
         MousePathPoint lastPoint = null;
         for (MousePathPoint a : MOUSE_PATH_POINTS) {
->>>>>>> Initial commit.
             if (lastPoint != null) {
                 g.setColor(a.getColor());
                 g.drawLine(a.x, a.y, lastPoint.x, lastPoint.y);
