@@ -1,15 +1,12 @@
 package org.bbrangeguild.strategy;
 
 import org.bbrangeguild.BBRangeGuild;
-import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.interactive.NPCs;
 import org.powerbot.game.api.methods.interactive.Players;
-import org.powerbot.game.api.methods.tab.Inventory;
 import org.powerbot.game.api.methods.widget.Camera;
-import org.powerbot.game.api.util.Random;
 import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.wrappers.interactive.NPC;
 import org.powerbot.game.api.wrappers.widget.WidgetChild;
@@ -17,7 +14,7 @@ import org.powerbot.game.api.wrappers.widget.WidgetChild;
 /**
  * @author BOOM BOOM
  */
-public class ExchangeStrategy extends Strategy implements Condition, Task {
+public class ExchangeStrategy extends Strategy implements Condition, Runnable {
 
     private BBRangeGuild script;
 

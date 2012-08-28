@@ -6,7 +6,6 @@ import org.bbrangeguild.util.ExchangeItem;
 import org.bbrangeguild.util.GeItem;
 import org.bbrangeguild.util.MousePathPoint;
 import org.bbrangeguild.util.SkillData;
-import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.concurrent.strategy.StrategyGroup;
@@ -147,7 +146,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             public boolean validate() {
                 return !antibanTimer.isRunning();
             }
-        }, new Task() {
+        }, new Runnable() {
             @Override
             public void run() {
                 antibanTimer.setEndIn(Random.nextInt(300000, 900000));
@@ -187,7 +186,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 final int yaw = Camera.getYaw();
                 return Game.isLoggedIn() && Camera.getPitch() > 8 || (yaw < 320 && yaw > 303);
             }
-        }, new Task() {
+        }, new Runnable() {
             @Override
             public void run() {
                 if (Camera.getPitch() > 8)
@@ -211,12 +210,13 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             public boolean validate() {
                 return true;
             }
-        }, new Task() {
+        }, new Runnable() {
             @Override
             public void run() {
+                log.info("" + Game.isLoggedIn());
                 if (Game.isLoggedIn() && Players.getLocal() != null && Players.getLocal().isOnScreen() && !Widgets.get(1252, 1).visible() && !Widgets.get(1234, 10).visible()) {
                     String money;
-                    if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 200).visible() && (money = Widgets.get(548, 200).getText()) != null && parseMultiplier(money) > 200) {
+                    if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 201).visible() && (money = Widgets.get(548, 201).getText()) != null && parseMultiplier(money) > 200) {
                         labelPic = getImage("bbrangeguild.jpeg", "http://i53.tinypic.com/2jalnrc.jpeg", "jpeg");
 
                         if (Inventory.getCount(1464) > 0)
@@ -275,7 +275,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
                         price = GeItem.lookup(gui.isCompeting() ? 892 : exchangeItem.getItemId()).getPrice();
                         revoke(setupStrategy);
-                    } else if (!Widgets.get(548, 200).visible()) {
+                    } else if (!Widgets.get(548, 201).visible()) {
                         Mouse.click(532, 146, true);
                         for (int i = 0; i < 20 && !Widgets.get(548, 200).visible(); i++)
                             Time.sleep(100);

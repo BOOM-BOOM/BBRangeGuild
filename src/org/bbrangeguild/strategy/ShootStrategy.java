@@ -1,7 +1,6 @@
 package org.bbrangeguild.strategy;
 
 import org.bbrangeguild.BBRangeGuild;
-import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.game.api.methods.Calculations;
 import org.powerbot.game.api.methods.Walking;
@@ -20,7 +19,7 @@ import java.awt.*;
 /**
  * @author BOOM BOOM
  */
-public class ShootStrategy implements Condition, Task {
+public class ShootStrategy implements Condition, Runnable {
 
     private BBRangeGuild script;
     private int fails;

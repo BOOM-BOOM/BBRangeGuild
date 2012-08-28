@@ -1,7 +1,6 @@
 package org.bbrangeguild.strategy;
 
 import org.bbrangeguild.BBRangeGuild;
-import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.game.api.methods.Widgets;
 import org.powerbot.game.api.methods.tab.Inventory;
@@ -11,7 +10,7 @@ import org.powerbot.game.api.wrappers.node.Item;
 /**
  * @author BOOM BOOM
  */
-public class EquipStrategy implements Condition, Task {
+public class EquipStrategy implements Condition, Runnable {
 
     private BBRangeGuild script;
 

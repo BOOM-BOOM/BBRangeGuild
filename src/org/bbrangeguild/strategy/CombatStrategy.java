@@ -1,7 +1,6 @@
 package org.bbrangeguild.strategy;
 
 import org.bbrangeguild.BBRangeGuild;
-import org.powerbot.concurrent.Task;
 import org.powerbot.concurrent.strategy.Condition;
 import org.powerbot.concurrent.strategy.Strategy;
 import org.powerbot.game.api.methods.Calculations;
@@ -18,7 +17,7 @@ import org.powerbot.game.api.wrappers.node.SceneObject;
 /**
  * @author BOOM BOOM
  */
-public class CombatStrategy extends Strategy implements Condition, Task {
+public class CombatStrategy extends Strategy implements Condition, Runnable {
 
     private BBRangeGuild script;
     private static final Tile spot = new Tile(2670, 3418, 0);
