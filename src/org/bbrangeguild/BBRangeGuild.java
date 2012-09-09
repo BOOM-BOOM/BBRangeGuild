@@ -41,9 +41,10 @@ import java.util.LinkedList;
 
 @Manifest(name = "BBRangeGuild",
         authors = "BOOM BOOM",
-        version = 1.0D,
+        version = 1.01D,
         description = "The ultimate Range Guild script! Over a year in experience!",
-        website = "https://www.powerbot.org/community/topic/679291-bbrangeguild-over-a-year-in-range-guilding-experience/")
+        website = "https://www.powerbot.org/community/topic/679291-bbrangeguild-over-a-year-in-range-guilding-experience/",
+        topic = 679291)
 public class BBRangeGuild extends ActiveScript implements PaintListener, MessageListener, MouseListener {
 
     private int startItems, targetMessage, gamesCompleted, absoluteY, price, exchangeMode, amount, ticketCount;
