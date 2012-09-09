@@ -37,7 +37,7 @@ public class CompeteStrategy extends Strategy implements Condition, Runnable {
                 final NPC judge = NPCs.getNearest(693);
                 if (judge != null) {
                     if (judge.isOnScreen()) {
-                        if (judge.interact("Compete")) {
+                        if (judge.interact("Compete", "Competition Judge")) {
                             for (int i = 0; i < 20 && !Widgets.get(1188, 3).visible(); i++)
                                 Time.sleep(100);
                         }
