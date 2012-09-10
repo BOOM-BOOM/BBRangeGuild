@@ -374,6 +374,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 int gainedXP = skillData.getGainedXP();
                 int gainedTickets = (checkingSkills ? ticketCount - startItems : (ticketCount = Inventory.getCount(true, 1464)) - startItems);
                 double profit = gainedTickets == 0 ? 0 : gainedTickets / 20.4 * price;
+                g.drawString("" + gui.isSpamClicking() + ", " + gui.isEquipingArrows() + ", " + gui.isAntiban(), 12, absoluteY + 36);
                 g.drawString("" + formatCommas((int) profit - (gamesCompleted * 200)), 100, absoluteY + 51);
                 g.drawString("" + formatCommas(gainedXP), 100, absoluteY + 66);
                 g.drawString("" + formatCommas(gainedTickets), 100, absoluteY + 81);
