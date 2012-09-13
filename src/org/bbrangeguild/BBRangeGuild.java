@@ -3,7 +3,6 @@ package org.bbrangeguild;
 import org.bbrangeguild.strategy.*;
 import org.bbrangeguild.ui.BBRangeGuildGUI;
 import org.bbrangeguild.util.ExchangeItem;
-import org.bbrangeguild.util.GeItem;
 import org.bbrangeguild.util.MousePathPoint;
 import org.bbrangeguild.util.SkillData;
 import org.powerbot.concurrent.strategy.Condition;
@@ -23,6 +22,7 @@ import org.powerbot.game.api.methods.widget.Camera;
 import org.powerbot.game.api.util.Random;
 import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.util.Timer;
+import org.powerbot.game.api.util.net.GeItem;
 import org.powerbot.game.api.wrappers.widget.WidgetChild;
 import org.powerbot.game.bot.event.MessageEvent;
 import org.powerbot.game.bot.event.listener.MessageListener;
@@ -41,7 +41,7 @@ import java.util.LinkedList;
 
 @Manifest(name = "BBRangeGuild",
         authors = "BOOM BOOM",
-        version = 1.01D,
+        version = 1.02D,
         description = "The ultimate Range Guild script! Over a year in experience!",
         website = "https://www.powerbot.org/community/topic/679291-bbrangeguild-over-a-year-in-range-guilding-experience/",
         topic = 679291)
@@ -106,7 +106,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         return spamClick;
     }
 
-    public boolean isEquipingArrows() {
+    public boolean isEquippingArrows() {
         return equipArrows;
     }
 
@@ -198,12 +198,29 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             }
         });
 
+        final Strategy widgetStrategy = new Strategy(new Condition() {
+            @Override
+            public boolean validate() {
+                return Widgets.get(594, 0).visible();
+            }
+        } ,new Runnable() {
+            @Override
+            public void run() {
+                if (Widgets.get(594, 0).visible()) {
+                    if (Widgets.get(594, 17).click(true)) {
+                        for (int i = 0; i < 20 && Widgets.get(594, 0).visible(); i++)
+                            Time.sleep(100);
+                    }
+                }
+            }
+        });
+
         final CombatStrategy combatStrategy = new CombatStrategy(this);
         final EquipStrategy equipStrategy = new EquipStrategy(this);
         final CompeteStrategy competeStrategy = new CompeteStrategy(this);
         final ShootStrategy shootStrategy = new ShootStrategy(this);
         final ExchangeStrategy exchangeStrategy = new ExchangeStrategy(this);
-        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { combatStrategy, new Strategy(equipStrategy, equipStrategy), cameraStrategy, competeStrategy,
+        final StrategyGroup groupCompete = new StrategyGroup(new Strategy[] { widgetStrategy, combatStrategy, new Strategy(equipStrategy, equipStrategy), cameraStrategy, competeStrategy,
                 new Strategy(shootStrategy, shootStrategy) });
 
         setupStrategy = new Strategy(new Condition() {
@@ -277,9 +294,10 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         price = GeItem.lookup(gui.isCompeting() ? 892 : exchangeItem.getItemId()).getPrice();
                         revoke(setupStrategy);
                     } else if (!Widgets.get(548, 201).visible()) {
-                        Mouse.click(532, 146, true);
-                        for (int i = 0; i < 20 && !Widgets.get(548, 200).visible(); i++)
-                            Time.sleep(100);
+                        if (Widgets.get(548, 202).click(true)) {
+                            for (int i = 0; i < 20 && !Widgets.get(548, 201).visible(); i++)
+                                Time.sleep(100);
+                        }
                     } else {
                         log.info("You do not have any coins with you.");
                         stop();
@@ -289,6 +307,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         });
 
         setupStrategy.setReset(true);
+        widgetStrategy.setReset(true);
         combatStrategy.setReset(true);
         competeStrategy.setReset(true);
         provide(setupStrategy);
