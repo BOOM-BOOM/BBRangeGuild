@@ -55,9 +55,10 @@ public class CompeteStrategy extends Strategy implements Condition, Runnable {
                 }
             }
         } else if (!Widgets.get(548, 201).visible()) {
-            Mouse.click(532, 146, true);
-            for (int i = 0; i < 20 && !Widgets.get(548, 201).visible(); i++)
-                Time.sleep(100);
+            if (Widgets.get(548, 202).click(true)) {
+                for (int i = 0; i < 20 && !Widgets.get(548, 201).visible(); i++)
+                    Time.sleep(100);
+            }
         } else {
             script.log.info("You do not have any coins with you.");
             script.stop();
