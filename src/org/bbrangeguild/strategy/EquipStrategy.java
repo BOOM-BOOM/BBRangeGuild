@@ -21,7 +21,7 @@ public class EquipStrategy implements Condition, Runnable {
     @Override
     public boolean validate() {
         String text;
-        return script.isEquipingArrows() ||  Widgets.get(1184, 13).visible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("bronze arrows");
+        return script.isEquippingArrows() ||  Widgets.get(1184, 13).visible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("bronze arrows");
     }
 
     @Override
@@ -35,7 +35,7 @@ public class EquipStrategy implements Condition, Runnable {
                     return;
                 }
             }
-        } else if (!script.isEquipingArrows()) {
+        } else if (!script.isEquippingArrows()) {
             script.log.info("You do not have any more arrows.");
             script.stop();
         }
