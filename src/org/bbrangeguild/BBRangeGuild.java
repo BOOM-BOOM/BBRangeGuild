@@ -41,7 +41,7 @@ import java.util.LinkedList;
 
 @Manifest(name = "BBRangeGuild",
         authors = "BOOM BOOM",
-        version = 1.02D,
+        version = 1.03D,
         description = "The ultimate Range Guild script! Over a year in experience!",
         website = "https://www.powerbot.org/community/topic/679291-bbrangeguild-over-a-year-in-range-guilding-experience/",
         topic = 679291)
@@ -185,7 +185,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
             @Override
             public boolean validate() {
                 final int yaw = Camera.getYaw();
-                return Game.isLoggedIn() && Camera.getPitch() > 8 || (yaw < 320 && yaw > 303);
+                return Game.isLoggedIn() && Camera.getPitch() > 8 || (yaw < 320 && yaw > 303) || (yaw >= 0 && yaw  <= 2) || (yaw <= 360 && yaw >= 358);
             }
         }, new Runnable() {
             @Override
@@ -242,13 +242,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         if (Widgets.get(325, 40).visible()) {
                             if (Widgets.get(325, 40).click(true)) {
                                 for (int i = 0; i < 20 && Widgets.get(325, 40).visible(); i++)
-                                    Time.sleep(100);
-                            }
-                        }
-
-                        if (Widgets.get(548, 201).visible()) {
-                            if (Widgets.get(548, 202).click(true)) {
-                                for (int i = 0; i < 20 && Widgets.get(548, 201).visible(); i++)
                                     Time.sleep(100);
                             }
                         }
