@@ -180,7 +180,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 }
             }
         });
-
+        // resizable 53, 309
         final Strategy cameraStrategy = new Strategy(new Condition() {
             @Override
             public boolean validate() {
@@ -231,7 +231,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
         }, new Runnable() {
             @Override
             public void run() {
-                log.info("" + Game.isLoggedIn());
                 if (Game.isLoggedIn() && Players.getLocal() != null && Players.getLocal().isOnScreen() && !Widgets.get(1252, 1).visible() && !Widgets.get(1234, 10).visible()) {
                     String money;
                     if (Inventory.getCount(true, 995) > 200 || Widgets.get(548, 201).visible() && (money = Widgets.get(548, 201).getText()) != null && parseMultiplier(money) > 200) {
@@ -243,6 +242,13 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                         if (Widgets.get(325, 40).visible()) {
                             if (Widgets.get(325, 40).click(true)) {
                                 for (int i = 0; i < 20 && Widgets.get(325, 40).visible(); i++)
+                                    Time.sleep(100);
+                            }
+                        }
+
+                        if (Widgets.get(548, 201).visible()) {
+                            if (Widgets.get(548, 202).click(true)) {
+                                for (int i = 0; i < 20 && Widgets.get(548, 201).visible(); i++)
                                     Time.sleep(100);
                             }
                         }
@@ -393,7 +399,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 int gainedXP = skillData.getGainedXP();
                 int gainedTickets = (checkingSkills ? ticketCount - startItems : (ticketCount = Inventory.getCount(true, 1464)) - startItems);
                 double profit = gainedTickets == 0 ? 0 : gainedTickets / 20.4 * price;
-                g.drawString("" + gui.isSpamClicking() + ", " + gui.isEquipingArrows() + ", " + gui.isAntiban(), 12, absoluteY + 36);
+                g.drawString("" + gui.isSpamClicking() + ", " + gui.isEquipingArrows() + ", " + gui.isAntiban(), 100, absoluteY + 36);
                 g.drawString("" + formatCommas((int) profit - (gamesCompleted * 200)), 100, absoluteY + 51);
                 g.drawString("" + formatCommas(gainedXP), 100, absoluteY + 66);
                 g.drawString("" + formatCommas(gainedTickets), 100, absoluteY + 81);
