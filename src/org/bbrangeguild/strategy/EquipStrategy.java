@@ -21,13 +21,13 @@ public class EquipStrategy implements Condition, Runnable {
     @Override
     public boolean validate() {
         String text;
-        return script.isEquippingArrows() ||  Widgets.get(1184, 13).visible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("bronze arrows");
+        return script.isEquippingArrows() || Widgets.get(1184, 13).visible() && (text = Widgets.get(1184, 13).getText()) != null && text.contains("bronze arrows");
     }
 
     @Override
     public void run() {
         if (Inventory.getCount(882) > 0) {
-            script.setStatus("Equiping Arrows...");
+            script.setStatus("Equipping Arrows...");
             for (final Item item : Inventory.getItems()) {
                 if (item.getId() == 882 && item.getWidgetChild().click(true)) {
                     for (int i = 0; i < 15 && Inventory.getCount(882) > 0; i++)
