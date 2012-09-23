@@ -24,7 +24,6 @@ import org.powerbot.game.api.util.Time;
 import org.powerbot.game.api.util.Timer;
 import org.powerbot.game.api.util.net.GeItem;
 import org.powerbot.game.api.wrappers.widget.WidgetChild;
-import org.powerbot.game.bot.event.MessageEvent;
 import org.powerbot.game.bot.event.listener.MessageListener;
 import org.powerbot.game.bot.event.listener.PaintListener;
 
@@ -180,7 +179,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 }
             }
         });
-        // resizable 53, 309
+
         final Strategy cameraStrategy = new Strategy(new Condition() {
             @Override
             public boolean validate() {
@@ -193,7 +192,7 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
                 if (Camera.getPitch() > 8)
                     Camera.setPitch(Random.nextInt(0, 9));
                 final int yaw = Camera.getYaw();
-                if (yaw < 320 && yaw > 303)
+                if ((yaw < 320 && yaw > 303) || (yaw >= 0 && yaw  <= 2) || (yaw <= 360 && yaw >= 358))
                     Camera.setAngle(Random.nextBoolean() ? Random.nextInt(320, 335) : Random.nextInt(285, 300));
             }
         });
@@ -473,25 +472,6 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
     }
 
     @Override
-    public void messageReceived(MessageEvent messageEvent) {
-        switch (messageEvent.getId()) {
-            case 109:
-                if (messageEvent.getMessage().equalsIgnoreCase("You carefully aim at the target...")) {
-                    if (targetMessage < 9)
-                        targetMessage++;
-                    else {
-                        targetMessage = 0;
-                        gamesCompleted++;
-                    }
-                } else if (messageEvent.getMessage().equalsIgnoreCase("200 coins have been removed from your money pouch.") && targetMessage > 0) {
-                    targetMessage = 0;
-                    gamesCompleted++;
-                }
-                break;
-        }
-    }
-
-    @Override
     public void mouseClicked(MouseEvent e) {
         switch (e.getButton()) {
             case MouseEvent.BUTTON1:
@@ -514,4 +494,23 @@ public class BBRangeGuild extends ActiveScript implements PaintListener, Message
 
     @Override
     public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void messageReceived(org.powerbot.core.event.events.MessageEvent messageEvent) {
+        switch (messageEvent.getId()) {
+            case 109:
+                if (messageEvent.getMessage().equalsIgnoreCase("You carefully aim at the target...")) {
+                    if (targetMessage < 9)
+                        targetMessage++;
+                    else {
+                        targetMessage = 0;
+                        gamesCompleted++;
+                    }
+                } else if (messageEvent.getMessage().equalsIgnoreCase("200 coins have been removed from your money pouch.") && targetMessage > 0) {
+                    targetMessage = 0;
+                    gamesCompleted++;
+                }
+                break;
+        }
+    }
 }
